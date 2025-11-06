@@ -114,3 +114,11 @@ npm run dev
 본 프로젝트는 교육용으로 제작되었으며, 상업적 이용을 금합니다.
 
 ---
+
+## Tailwind CSS 설치 및 클래스
+
+https://tailwindcss.com/docs/installation/using-vite
+
+## Shadcn/ui
+
+https://ui.shadcn.com/docs/installation/next

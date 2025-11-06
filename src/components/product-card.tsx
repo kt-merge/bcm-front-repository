@@ -3,18 +3,7 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { AlarmClock } from "lucide-react";
-
-interface ProductCardProps {
-  product: {
-    id: number;
-    title: string;
-    image: string;
-    currentBid: number;
-    bids: number;
-    timeLeft: string;
-    status: string;
-  };
-}
+import { ProductCardProps } from "@/types";
 
 export default function ProductCard({ product }: ProductCardProps) {
   const [displayTime, setDisplayTime] = useState(product.timeLeft);
@@ -29,7 +18,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   }, [product.timeLeft]);
 
   return (
-    <Link href={`/product/${product.id}`}>
+    <Link href={`/products/${product.id}`}>
       <div className="group flex h-full cursor-pointer flex-col">
         {/* Image Container */}
         <div className="bg-muted border-border relative mb-4 flex aspect-square items-center justify-center overflow-hidden rounded-lg border">
