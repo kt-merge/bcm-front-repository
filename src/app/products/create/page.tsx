@@ -5,11 +5,11 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-import ProgressIndicator from "@/components/ProgressIndicator";
-import Step1UploadPhotos from "@/components/Step1UploadPhotos";
-import Step2Details from "@/components/Step2Details";
-import Step3Pricing from "@/components/Step3Pricing";
-import Step4Review from "@/components/Step4Review";
+import ProgressIndicator from "@/components/common/ProgressIndicator";
+import Step1UploadPhotos from "@/components/forms/Step1UploadPhotos";
+import Step2Details from "@/components/forms/Step2Details";
+import Step3Pricing from "@/components/forms/Step3Pricing";
+import Step4Review from "@/components/forms/Step4Review";
 
 export default function CreateProductPage() {
   const [step, setStep] = useState(1);
@@ -45,10 +45,10 @@ export default function CreateProductPage() {
       <div className="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
         <div className="mb-12">
           <h1 className="text-foreground mb-2 text-4xl font-bold md:text-5xl">
-            Sell Your Item
+            상품 등록
           </h1>
           <p className="text-muted-foreground text-lg">
-            List your product on Blind Chicken Market in 4 simple steps
+            블라인드 치킨 마켓에 상품을 등록하세요
           </p>
         </div>
 
@@ -79,7 +79,7 @@ export default function CreateProductPage() {
               className="flex items-center gap-2 bg-transparent"
             >
               <ChevronLeft size={18} />
-              Back
+              이전
             </Button>
 
             <div className="flex gap-3">
@@ -88,13 +88,13 @@ export default function CreateProductPage() {
                   onClick={handleNextStep}
                   className="flex items-center gap-2"
                 >
-                  Next
+                  다음
                   <ChevronRight size={18} />
                 </Button>
               )}
               {step === 4 && (
                 <Button onClick={handleSubmit} size="lg" className="px-8">
-                  Publish Listing
+                  등록하기
                 </Button>
               )}
             </div>

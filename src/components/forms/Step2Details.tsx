@@ -19,36 +19,32 @@ export default function Step2Details({
   onChange,
 }: Step2DetailsProps) {
   const categories = [
-    "Electronics",
-    "Fashion",
-    "Collectibles",
-    "Books",
-    "Home & Garden",
-    "Sports",
-    "Other",
+    "전자기기",
+    "패션",
+    "수집품",
+    "도서",
+    "홈/가든",
+    "스포츠",
+    "기타",
   ];
-  const conditions = ["Like New", "Good", "Fair", "Poor"];
+  const conditions = ["거의 새것", "좋음", "보통", "나쁨"];
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-foreground mb-2 text-2xl font-bold">
-          Product Details
-        </h2>
-        <p className="text-muted-foreground">
-          Tell us about what you are selling
-        </p>
+        <h2 className="text-foreground mb-2 text-2xl font-bold">상품 정보</h2>
+        <p className="text-muted-foreground">판매하실 상품에 대해 알려주세요</p>
       </div>
 
       <div className="space-y-4">
         {/* Title */}
         <div>
           <label className="text-foreground mb-2 block text-sm font-medium">
-            Product Title *
+            상품명 *
           </label>
           <Input
             name="title"
-            placeholder="Be specific and clear (e.g., Sony WH-1000XM4 Wireless Headphones)"
+            placeholder="상품명을 입력해주세요 (예: 삼성 갤럭시 버즈 프로)"
             value={formData.title}
             onChange={onChange}
             className="w-full"
@@ -59,7 +55,7 @@ export default function Step2Details({
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="text-foreground mb-2 block text-sm font-medium">
-              Category *
+              카테고리 *
             </label>
             <select
               name="category"
@@ -76,7 +72,7 @@ export default function Step2Details({
           </div>
           <div>
             <label className="text-foreground mb-2 block text-sm font-medium">
-              Condition *
+              상태 *
             </label>
             <select
               name="condition"
@@ -96,11 +92,11 @@ export default function Step2Details({
         {/* Description */}
         <div>
           <label className="text-foreground mb-2 block text-sm font-medium">
-            Description
+            상세 설명
           </label>
           <textarea
             name="description"
-            placeholder="Describe the item condition, features, and any defects..."
+            placeholder="상품의 상태, 특징, 결함 등을 자세히 설명해주세요..."
             value={formData.description}
             onChange={onChange}
             rows={5}

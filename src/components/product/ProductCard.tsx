@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { AlarmClock } from "lucide-react";
-import { ProductCardProps } from "@/types";
+import { Product } from "@/types";
 
-export default function ProductCard({ product }: ProductCardProps) {
+export default function ProductCard({ product }: { product: Product }) {
   const [displayTime, setDisplayTime] = useState(product.timeLeft);
 
   // Simple timer animation for demo

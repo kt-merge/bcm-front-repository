@@ -58,16 +58,6 @@ export default function Navigation() {
 
         {/* 메뉴 링크 */}
         <div className="hidden items-center gap-6 md:flex">
-          <Link
-            href="/products/create"
-            className={`text-sm font-medium whitespace-nowrap transition-colors ${
-              isActive("/products/create")
-                ? "text-foreground"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            상품 등록
-          </Link>
           {isLoggedIn && (
             <Link
               href="/mypage"

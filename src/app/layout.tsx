@@ -1,6 +1,7 @@
-import Navigation from "@/components/navigation";
+import Navigation from "@/components/common/navigation";
 import "./globals.css";
 import type { Metadata } from "next";
+import { AuthProvider } from "@/hooks/useAuth";
 
 export const metadata: Metadata = {
   title: "Blind Chicken Market",
@@ -16,7 +17,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <Navigation />
-        {children}
+        <AuthProvider>{children}</AuthProvider>
         <footer>
           <div>© 2025 Darius Team</div>
         </footer>

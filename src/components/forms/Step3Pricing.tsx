@@ -26,20 +26,18 @@ export default function Step3Pricing({
   setFormData,
 }: Step3PricingProps) {
   const durations = [
-    { label: "3 days", value: "3" },
-    { label: "7 days", value: "7" },
-    { label: "14 days", value: "14" },
-    { label: "30 days", value: "30" },
+    { label: "3일", value: "3" },
+    { label: "7일", value: "7" },
+    { label: "14일", value: "14" },
+    { label: "30일", value: "30" },
   ];
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-foreground mb-2 text-2xl font-bold">
-          Pricing & Duration
-        </h2>
+        <h2 className="text-foreground mb-2 text-2xl font-bold">가격 설정</h2>
         <p className="text-muted-foreground">
-          Set your starting price and auction length
+          시작 가격과 경매 기간을 설정해주세요
         </p>
       </div>
 
@@ -47,16 +45,16 @@ export default function Step3Pricing({
         {/* Starting Price */}
         <div>
           <label className="text-foreground mb-2 block text-sm font-medium">
-            Starting Price *
+            시작 가격 *
           </label>
           <div className="flex items-center gap-2">
             <span className="text-muted-foreground text-lg font-semibold">
-              $
+              ₩
             </span>
             <Input
               type="number"
               name="startingPrice"
-              placeholder="0.00"
+              placeholder="0"
               value={formData.startingPrice}
               onChange={(e) =>
                 setFormData((prev) => ({
@@ -65,20 +63,19 @@ export default function Step3Pricing({
                 }))
               }
               className="flex-1"
-              step="0.01"
+              step="1000"
               min="0"
             />
           </div>
           <p className="text-muted-foreground mt-2 text-xs">
-            Suggested price: Based on similar items, consider starting at
-            $50-$200
+            유사 상품 기준 50,000원 ~ 200,000원을 권장합니다
           </p>
         </div>
 
         {/* Duration */}
         <div>
           <label className="text-foreground mb-3 block text-sm font-medium">
-            Auction Duration
+            경매 기간
           </label>
           <div className="grid grid-cols-2 gap-3">
             {durations.map((dur) => (
@@ -96,45 +93,6 @@ export default function Step3Pricing({
                 {dur.label}
               </button>
             ))}
-          </div>
-        </div>
-
-        {/* Fee Breakdown */}
-        <div className="bg-muted/50 border-border rounded-lg border p-4">
-          <h3 className="text-foreground mb-3 font-semibold">
-            Fees & Earnings
-          </h3>
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Starting Price:</span>
-              <span className="text-foreground font-medium">
-                ${formData.startingPrice || "0.00"}
-              </span>
-            </div>
-            <div className="border-border mt-2 border-t pt-2">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">
-                  Platform Fee (5%):
-                </span>
-                <span className="text-destructive">
-                  -$
-                  {(
-                    (Number.parseFloat(formData.startingPrice) || 0) * 0.05
-                  ).toFixed(2)}
-                </span>
-              </div>
-            </div>
-            <div className="border-border mt-2 border-t pt-2">
-              <div className="flex justify-between font-semibold">
-                <span>Your Earnings:</span>
-                <span className="text-foreground">
-                  $
-                  {(
-                    (Number.parseFloat(formData.startingPrice) || 0) * 0.95
-                  ).toFixed(2)}
-                </span>
-              </div>
-            </div>
           </div>
         </div>
       </div>

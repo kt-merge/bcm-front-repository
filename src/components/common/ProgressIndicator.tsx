@@ -30,10 +30,10 @@ export default function ProgressIndicator({ step }: ProgressIndicatorProps) {
         ))}
       </div>
       <div className="text-muted-foreground mt-4 flex justify-between text-xs font-medium md:text-sm">
-        <span>Photos</span>
-        <span>Details</span>
-        <span>Pricing</span>
-        <span>Review</span>
+        <span>사진</span>
+        <span>정보</span>
+        <span>가격</span>
+        <span>확인</span>
       </div>
     </div>
   );

@@ -1,10 +1,10 @@
-"use client";
-
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "./useAuth";
 
 export function useLoginForm() {
   const router = useRouter();
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -22,31 +22,26 @@ export function useLoginForm() {
     setIsLoading(true);
 
     try {
-      // Spring Boot API 호출
-      // const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({ email, password }),
-      // });
-      // if (!res.ok) throw new Error("로그인 실패");
-      // const data = await res.json();
-      // localStorage.setItem("accessToken", data.accessToken);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
-      await new Promise((r) => setTimeout(r, 800)); // 임시 로딩 효과
-      router.push("/");
+      if (!res.ok) throw new Error("로그인 실패");
+      const data = await res.json();
+
+      // 로그인 성공 시 JWT + 사용자 정보 저장
+      login(data.accessToken, data.user);
+
+      router.push("/"); // 메인 페이지로 이동
     } catch (err) {
-      setError("이메일 또는 비밀번호가 올바르지 않습니다.");
+      const error = err as Error;
+      setError(error.message || "로그인 실패");
     } finally {
       setIsLoading(false);
     }
   };
 
-  return {
-    email,
-    password,
-    error,
-    isLoading,
-    handleChange,
-    handleSubmit,
-  };
+  return { email, password, error, isLoading, handleChange, handleSubmit };
 }

@@ -27,11 +27,9 @@ export default function Step1UploadPhotos({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-foreground mb-2 text-2xl font-bold">
-          Upload Photos
-        </h2>
+        <h2 className="text-foreground mb-2 text-2xl font-bold">사진 업로드</h2>
         <p className="text-muted-foreground">
-          Add up to 5 photos of your item. First image will be the main photo.
+          최대 5장까지 업로드 가능합니다. 첫 번째 사진이 대표 사진이 됩니다.
         </p>
       </div>
 
@@ -39,9 +37,9 @@ export default function Step1UploadPhotos({
         <label className="border-border hover:bg-muted col-span-2 flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 transition-colors md:col-span-1">
           <Upload className="text-muted-foreground mb-2 h-8 w-8" />
           <span className="text-foreground text-sm font-medium">
-            Upload Photo
+            사진 업로드
           </span>
-          <span className="text-muted-foreground text-xs">Max 5MB</span>
+          <span className="text-muted-foreground text-xs">최대 5MB</span>
           <input
             type="file"
             multiple
@@ -67,7 +65,7 @@ export default function Step1UploadPhotos({
             </button>
             {idx === 0 && (
               <div className="bg-primary text-primary-foreground absolute top-2 left-2 rounded px-2 py-1 text-xs font-medium">
-                Main
+                대표
               </div>
             )}
           </div>
@@ -75,7 +73,7 @@ export default function Step1UploadPhotos({
       </div>
 
       <p className="text-muted-foreground text-xs">
-        {uploadedImages.length}/5 photos uploaded
+        {uploadedImages.length}/5 장 업로드됨
       </p>
     </div>
   );
