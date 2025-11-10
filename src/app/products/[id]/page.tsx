@@ -25,12 +25,13 @@ export default function ProductDetail({
   const product: Product | null = foundProduct
     ? {
         ...foundProduct,
-        description: "상품 설명이 없습니다.",
-        minBid: foundProduct.currentBid + 10000,
-        seller: "익명 판매자",
-        condition: "중고",
-        category: "기타",
-        bidHistory: [
+        description: foundProduct.description || "상품 설명이 없습니다.",
+        minBid:
+          (foundProduct as Product).minBid || foundProduct.currentBid + 10000,
+        seller: foundProduct.seller || "익명 판매자",
+        condition: foundProduct.condition || "미개봉",
+        category: foundProduct.category || "기타",
+        bidHistory: (foundProduct as Product).bidHistory || [
           {
             bidder: "사용자 #1928",
             amount: foundProduct.currentBid,

@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { CircleUser, LogOut, Search } from "lucide-react";
+import { Search } from "lucide-react";
 
 export default function Navigation() {
   const pathname = usePathname();
@@ -31,9 +32,10 @@ export default function Navigation() {
         {/* 로고 */}
         <Link
           href="/"
-          className="text-foreground shrink-0 text-xl font-bold transition-opacity hover:opacity-80"
+          className="text-foreground flex shrink-0 items-center gap-2 text-xl font-bold transition-opacity hover:opacity-80"
         >
-          🐔 B.C.Market
+          <Image src="/BCM.png" alt="BCM 로고" width={32} height={32} />
+          ㅂㅊㅁ
         </Link>
 
         {/* 검색바 */}
@@ -56,42 +58,29 @@ export default function Navigation() {
           </Button>
         </form>
 
-        {/* 메뉴 링크 */}
-        <div className="hidden items-center gap-6 md:flex">
-          {isLoggedIn && (
-            <Link
-              href="/mypage"
-              className={`text-sm font-medium whitespace-nowrap transition-colors ${
-                isActive("/mypage")
-                  ? "text-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              마이페이지
-            </Link>
-          )}
-        </div>
-
         {/* 로그인/회원가입 */}
         <div className="flex shrink-0 items-center gap-3">
           {isLoggedIn ? (
-            <div className="flex items-center gap-3">
+            <>
               <Link
                 href="/mypage"
-                className="hover:bg-muted text-foreground rounded-lg p-2 transition-colors"
-                title="마이페이지"
+                className={`text-sm font-medium whitespace-nowrap transition-colors ${
+                  isActive("/mypage")
+                    ? "text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
               >
-                <CircleUser className="h-5 w-5" />
+                마이페이지
               </Link>
               <Button
-                variant="ghost"
+                variant="outline"
                 size="sm"
                 onClick={handleLogout}
-                className="text-muted-foreground hover:text-foreground rounded-lg"
+                className="rounded-lg"
               >
-                <LogOut className="h-4 w-4" />
+                로그아웃
               </Button>
-            </div>
+            </>
           ) : (
             <>
               <Link

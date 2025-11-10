@@ -26,7 +26,7 @@ export function ProductInfo({
       <div className="border-border space-y-3 border-b pb-6">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1">
-            <h1 className="text-foreground text-2xl font-bold text-balance md:text-3xl">
+            <h1 className="text-foreground text-2xl font-bold text-balance md:text-xl">
               {title}
             </h1>
             <p className="text-muted-foreground mt-2 text-sm">{seller}</p>
