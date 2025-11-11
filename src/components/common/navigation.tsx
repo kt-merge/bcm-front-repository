@@ -6,18 +6,14 @@ import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Navigation() {
   const pathname = usePathname();
   const router = useRouter();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-
+  const { user, logout } = useAuth();
   const isActive = (path: string) => pathname === path;
-
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,7 +34,7 @@ export default function Navigation() {
           ㅂㅊㅁ
         </Link>
 
-        {/* 검색바 */}
+        {/* 검색바*/}
         <form
           onSubmit={handleSearch}
           className="hidden max-w-md flex-1 items-center gap-2 md:flex"
@@ -58,10 +54,13 @@ export default function Navigation() {
           </Button>
         </form>
 
-        {/* 로그인/회원가입 */}
         <div className="flex shrink-0 items-center gap-3">
-          {isLoggedIn ? (
+          {user ? (
+            // --- 로그인 된 상태 ---
             <>
+              <span className="text-foreground hidden text-sm font-medium sm:block">
+                {user.nickname}님
+              </span>
               <Link
                 href="/mypage"
                 className={`text-sm font-medium whitespace-nowrap transition-colors ${
@@ -75,13 +74,14 @@ export default function Navigation() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={handleLogout}
+                onClick={logout} // 6. useAuth의 logout 함수를 직접 연결
                 className="rounded-lg"
               >
                 로그아웃
               </Button>
             </>
           ) : (
+            // --- 로그아웃 된 상태 ---
             <>
               <Link
                 href="/login"

@@ -5,9 +5,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { AlertCircle } from "lucide-react";
+import axios from "axios";
+import { useAuth } from "@/hooks/useAuth";
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
 export default function Login() {
   const router = useRouter();
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -19,32 +24,43 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/sign-in`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
-          credentials: "include", // 쿠키 기반 인증 시 필요
-        },
+      // --- [1단계] 로그인 API 호출 (토큰 받기) ---
+      const loginResponse = await axios.post(
+        `${API_BASE_URL}/api/auth/sign-in`,
+        { email, password },
       );
 
-      if (!res.ok) {
-        throw new Error("로그인 실패");
+      const { accessToken } = loginResponse.data; // SignInResponseDto
+      if (!accessToken) {
+        throw new Error("로그인 응답에 accessToken이 없습니다.");
       }
 
-      // JWT를 JSON으로 받는 경우 (ex: { accessToken: "...", refreshToken: "..." })
-      const data = await res.json();
+      // --- [2단계] 유저 정보 API 호출 (토큰 사용) ---
+      const userResponse = await axios.get(`${API_BASE_URL}/api/users/me`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
 
-      // accessToken을 localStorage에 저장 (HttpOnly 쿠키 사용 시 생략)
-      localStorage.setItem("accessToken", data.accessToken);
-      localStorage.setItem("refreshToken", data.refreshToken);
+      const userData = userResponse.data; // UserResponseDto
+
+      // --- [3단계] useAuth 훅으로 전역 상태 및 localStorage 저장 ---
+      // (이 함수가 axios 기본 헤더 설정까지 모두 처리합니다)
+      login(accessToken, userData);
 
       // 로그인 성공 후 홈으로 이동
       router.push("/");
     } catch (err) {
       console.error(err);
-      setError("이메일 또는 비밀번호가 올바르지 않습니다.");
+      // 401(비번틀림), 404(유저없음) 등 명확한 에러 처리
+      if (
+        axios.isAxiosError(err) &&
+        (err.response?.status === 401 || err.response?.status === 404)
+      ) {
+        setError("이메일 또는 비밀번호가 올바르지 않습니다.");
+      } else {
+        setError("로그인에 실패했습니다. 다시 시도해주세요.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -77,6 +93,7 @@ export default function Login() {
             </label>
             <input
               type="email"
+              name="email" // name 속성 추가 (일관성)
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="your@example.com"
@@ -92,6 +109,7 @@ export default function Login() {
             </label>
             <input
               type="password"
+              name="password" // name 속성 추가
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"

@@ -14,13 +14,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="ko">
       <body>
-        <Navigation />
-        <AuthProvider>{children}</AuthProvider>
-        <footer>
-          <div>© 2025 Darius Team</div>
-        </footer>
+        <AuthProvider>
+          <Navigation />
+          <main>{children}</main>
+          <footer>
+            <div>© 2025 Darius Team</div>
+          </footer>
+        </AuthProvider>
       </body>
     </html>
   );
