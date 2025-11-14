@@ -8,10 +8,6 @@ import { ProductFormData } from "@/types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
-interface ProductCreateResponse {
-  productId: number;
-}
-
 export function useCreateProductForm() {
   const router = useRouter();
   const { user, isLoading: isAuthLoading, accessToken } = useAuth();
@@ -27,8 +23,7 @@ export function useCreateProductForm() {
     startPrice: "",
     bidEndDate: defaultBidEndDate,
     productStatus: "GOOD",
-    imageUrl:
-      "https://cdn.inflearn.com/public/files/courses/335872/cover/01jqb5mphmn93fqvvs4ad8z6t1",
+    imageUrl: "",
   });
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
@@ -71,7 +66,6 @@ export function useCreateProductForm() {
     setError(null);
 
     try {
-      
       const jsonData = JSON.stringify({
         name: formData.name,
         description: formData.description,
@@ -84,25 +78,17 @@ export function useCreateProductForm() {
         imageUrl: formData.imageUrl,
       });
 
-      // productFormData.append(
-      //   "requestDto",
-      //   new Blob([jsonData], { type: "application/json" }),
-      // );
-
-      // imageFiles.forEach((file) => {
-      //   productFormData.append("images", file);
-      // });
-
-      await axios.post(`${API_BASE_URL}/api/products`, jsonData, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        }
-      }).then(result => {
-        alert("상품이 성공적으로 등록됐습니다.");  
-        router.push(`/products/${result.data.id}`)
-      });
-
+      await axios
+        .post(`${API_BASE_URL}/api/products`, jsonData, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+        })
+        .then((result) => {
+          alert("상품이 성공적으로 등록됐습니다.");
+          router.push(`/products/${result.data.id}`);
+        });
     } catch (err) {
       console.error("상품 등록 실패:", err);
       setError("상품 등록에 실패했습니다. 다시 시도해주세요.");
