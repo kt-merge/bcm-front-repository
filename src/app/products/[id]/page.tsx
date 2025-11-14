@@ -1,21 +1,30 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Heart } from "lucide-react";
 import { Product } from "@/types";
 import axios from "axios";
+
+import { useAuth } from "@/hooks/user/useAuth";
+
 import { PRODUCT_CATEGORIES, PRODUCT_STATUS } from "@/lib/constants";
 
+import SockJs from "sockjs-client";
+import { Client } from "@stomp/stompjs";
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+
 
 export default function ProductDetail({
   params,
 }: {
   params: Promise<{ id: string }> | { id: string };
 }) {
+  const clientRef = useRef<Client | null>(null);
+  const { user } = useAuth();
   const [product, setProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -29,8 +38,56 @@ export default function ProductDetail({
       const resolvedParams = await Promise.resolve(params);
       setProductId(resolvedParams.id);
     };
+
     initializeParams();
+
+
+    return () => {
+      clientRef.current?.deactivate();
+      console.log("WebSocket disconnected");
+    }
   }, [params]);
+
+  useEffect(() => {
+    if (!productId) return;
+
+    const client = new Client({
+      webSocketFactory: () => new SockJs(`${API_BASE_URL}/connect`),
+      debug: (str) => { console.log(str) },
+      reconnectDelay: 5000,
+      heartbeatIncoming: 4000,
+      heartbeatOutgoing: 4000,
+    })
+
+    clientRef.current = client;
+
+    clientRef.current.onConnect = () => {
+      console.log("WebSocket connected");
+
+      clientRef.current?.subscribe(`/topic/products/${productId}/product-bids`, (msg) => {
+        
+        setProduct((prev) => {
+          if (!prev) return prev;
+
+          const updatedProduct = { ...prev };
+          const newBid = JSON.parse(msg.body);
+
+          updatedProduct.bidPrice = newBid.price;
+          updatedProduct.bidCount += 1;
+
+          return updatedProduct;
+        })
+      })
+
+    }
+
+    clientRef.current.activate();
+
+    return () => {
+      clientRef.current?.deactivate();
+      console.log("WebSocket disconnected");
+    }
+  }, [productId])
 
   useEffect(() => {
     if (!productId) return;
@@ -91,7 +148,17 @@ export default function ProductDetail({
   };
 
   const handlePlaceBid = () => {
-    alert(`₩${bidAmount}로 입찰되었습니다!`);
+
+    if (!bidAmount || isNaN(Number(bidAmount))) return;
+    
+    clientRef.current?.publish({
+      destination: `/publish/products/${productId}/product-bids`,
+      body: JSON.stringify({
+        price: Number(bidAmount),
+        email: user?.email
+      })
+    })
+
     setShowBidForm(false);
   };
 
