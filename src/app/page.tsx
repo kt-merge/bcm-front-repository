@@ -1,14 +1,49 @@
 "use client";
 
 import Link from "next/link";
+import { useState, useEffect } from "react";
 import ProductCard from "@/components/product/ProductCard";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/user/useAuth";
-import products from "@/mocks/products.json";
+import { ProductListResponse, Product } from "@/types";
+
+import mockData from "@/mocks/products.json";
 
 export default function Home() {
   const { user } = useAuth();
-  const productList = products;
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await fetch(
+          "http://localhost:8080/api/products?page=0&offset=10",
+        );
+
+        if (!res.ok) {
+          throw new Error("Failed to fetch products from API");
+        }
+
+        const data: ProductListResponse = await res.json();
+
+        // API 응답은 성공했으나, 데이터가 비어있는 경우 mock 데이터 사용
+        if (data.content && data.content.length > 0) {
+          setProducts(data.content);
+        } else {
+          console.warn("API returned empty list, loading mock data.");
+          setProducts(mockData);
+        }
+      } catch (error) {
+        // API fetch 자체가 실패한 경우(네트워크 오류, 서버 다운 등) mock 데이터 사용
+        console.error("API fetch failed, loading mock data:", error);
+        setProducts(mockData);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
 
   return (
     <main className="bg-background min-h-screen">
@@ -41,14 +76,19 @@ export default function Home() {
           <div className="mb-8">
             <p className="font-bold">Hot Items🔥</p>
             <p className="text-muted-foreground text-sm">
-              Showing {productList.length} items
+              Showing {products.length} items
             </p>
           </div>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {productList.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
+
+          {loading ? (
+            <p>Loading...</p>
+          ) : (
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {products.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          )}
         </div>
       </section>
     </main>

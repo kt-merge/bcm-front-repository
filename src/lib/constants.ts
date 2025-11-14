@@ -21,7 +21,7 @@ export const PRODUCT_STATUS = [
 ];
 
 /**
- * 경매 기간 (Step3)
+ * 경매 기간
  */
 export const AUCTION_DURATIONS = [
   { label: "3일", value: "3" },

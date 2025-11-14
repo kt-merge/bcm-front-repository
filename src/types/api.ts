@@ -1,4 +1,21 @@
-// === API 통신용 타입 ===
+// 정렬 정보
+export interface Sort {
+  empty: boolean;
+  sorted: boolean;
+  unsorted: boolean;
+}
+
+// 페이지 정보
+export interface Pageable {
+  pageNumber: number;
+  pageSize: number;
+  sort: Sort;
+  offset: number;
+  paged: boolean;
+  unpaged: boolean;
+}
+
+// 회원정보
 export interface User {
   id: number;
   nickname: string;
@@ -7,6 +24,7 @@ export interface User {
   phoneNumber: string;
 }
 
+// POST 회원가입
 export interface SignUpRequest {
   email: string;
   password: string;
@@ -14,6 +32,7 @@ export interface SignUpRequest {
   phoneNumber: string;
 }
 
+// POST 로그인 요청 및 응답
 export interface SignInRequest {
   email: string;
   password: string;
@@ -25,6 +44,7 @@ export interface SignInResponse {
   user: User;
 }
 
+// GET 상품 상세
 export interface Product {
   id: number;
   name: string;
@@ -39,6 +59,7 @@ export interface Product {
   modifiedAt?: string;
 }
 
+// POST 상품 등록
 export interface CreateProductRequest {
   name: string;
   description: string;
@@ -48,21 +69,7 @@ export interface CreateProductRequest {
   imageUrl: string;
 }
 
-export interface Sort {
-  empty: boolean;
-  sorted: boolean;
-  unsorted: boolean;
-}
-
-export interface Pageable {
-  pageNumber: number;
-  pageSize: number;
-  sort: Sort;
-  offset: number;
-  paged: boolean;
-  unpaged: boolean;
-}
-
+// GET 상품 리스트
 export interface ProductListResponse {
   content: Product[];
   pageable: Pageable;

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Product } from "@/types";
+import { AlarmClock } from "lucide-react";
 
 export default function ProductCard({ product }: { product: Product }) {
   return (
@@ -26,6 +27,9 @@ export default function ProductCard({ product }: { product: Product }) {
             <p className="text-foreground text-2xl font-bold">
               \{product.bidPrice.toLocaleString("ko-KR")}
             </p>
+            <span className="text-muted-foreground flex items-center gap-1 text-xs font-medium">
+              <AlarmClock size={14} /> 데이터 준비 중...
+            </span>
           </div>
         </div>
       </div>
