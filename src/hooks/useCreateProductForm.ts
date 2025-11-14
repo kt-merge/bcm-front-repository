@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+
 import { useAuth } from "@/hooks/user/useAuth";
 import { ProductFormData } from "@/types";
 
@@ -13,6 +14,7 @@ interface ProductCreateResponse {
 }
 
 export function useCreateProductForm() {
+
   const router = useRouter();
   const { user, isLoading: isAuthLoading, accessToken } = useAuth();
 
@@ -20,6 +22,7 @@ export function useCreateProductForm() {
   const defaultBidEndDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
     .toISOString()
     .slice(0, 10);
+
   const [formData, setFormData] = useState<ProductFormData>({
     name: "",
     description: "",
@@ -71,7 +74,27 @@ export function useCreateProductForm() {
     setError(null);
 
     try {
-      
+
+      for(const file of imageFiles) {
+        
+        const presignedResponse = await axios.post(`${API_BASE_URL}/api/s3/upload-url`, {
+          fileName: file.name,
+        }, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          }
+        })
+
+        await fetch(presignedResponse.data.url, {
+          method: "PUT",
+          headers: {
+            "Content-Type": file.type,
+          },
+          body: file,
+        })
+    
+      }
+
       const jsonData = JSON.stringify({
         name: formData.name,
         description: formData.description,
@@ -81,17 +104,8 @@ export function useCreateProductForm() {
           ? new Date(formData.bidEndDate).toISOString()
           : null,
         productStatus: formData.productStatus,
-        imageUrl: formData.imageUrl,
+        imageUrl: imageFiles[0].name,
       });
-
-      // productFormData.append(
-      //   "requestDto",
-      //   new Blob([jsonData], { type: "application/json" }),
-      // );
-
-      // imageFiles.forEach((file) => {
-      //   productFormData.append("images", file);
-      // });
 
       await axios.post(`${API_BASE_URL}/api/products`, jsonData, {
         headers: {
