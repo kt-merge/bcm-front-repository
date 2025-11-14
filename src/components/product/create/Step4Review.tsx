@@ -1,9 +1,5 @@
 import { ProductFormData } from "@/types";
-import {
-  PRODUCT_CATEGORIES,
-  PRODUCT_CONDITIONS,
-  AUCTION_DURATIONS,
-} from "@/lib/constants";
+import { PRODUCT_CATEGORIES, PRODUCT_STATUS } from "@/lib/constants";
 
 interface Step4ReviewProps {
   formData: ProductFormData;
@@ -14,16 +10,15 @@ export default function Step4Review({
   formData,
   uploadedImages,
 }: Step4ReviewProps) {
-  // value(ENUM)를 label(한글)로 변환하는 로직
   const categoryLabel =
     PRODUCT_CATEGORIES.find((c) => c.value === formData.category)?.label ||
     formData.category;
-  const conditionLabel =
-    PRODUCT_CONDITIONS.find((c) => c.value === formData.condition)?.label ||
-    formData.condition;
-  const durationLabel = AUCTION_DURATIONS.find(
-    (d) => d.value === formData.duration,
-  )?.label;
+  const productStatusLabel =
+    PRODUCT_STATUS.find((c) => c.value === formData.productStatus)?.label ||
+    formData.productStatus;
+  const endDateLabel = formData.bidEndDate
+    ? new Date(formData.bidEndDate).toLocaleDateString("ko-KR")
+    : "지정되지 않음";
 
   return (
     <div className="space-y-6">
@@ -57,7 +52,7 @@ export default function Step4Review({
           <div>
             <p className="text-muted-foreground text-xs">상품명</p>
             <p className="text-foreground font-semibold">
-              {formData.title || "입력되지 않음"}
+              {formData.name || "입력되지 않음"}
             </p>
           </div>
 
@@ -71,7 +66,7 @@ export default function Step4Review({
             <div>
               <p className="text-muted-foreground text-xs">상태</p>
               <p className="text-foreground font-semibold capitalize">
-                {conditionLabel}
+                {productStatusLabel}
               </p>
             </div>
           </div>
@@ -88,14 +83,14 @@ export default function Step4Review({
               <p className="text-muted-foreground text-xs">시작 가격</p>
               <p className="text-foreground font-semibold">
                 {`₩${Number.parseInt(
-                  formData.startingPrice || "0",
+                  formData.startPrice || "0",
                   10,
                 ).toLocaleString()}`}
               </p>
             </div>
             <div>
-              <p className="text-muted-foreground text-xs">경매 기간</p>
-              <p className="text-foreground font-semibold">{durationLabel}</p>
+              <p className="text-muted-foreground text-xs">경매 종료 날짜</p>
+              <p className="text-foreground font-semibold">{endDateLabel}</p>
             </div>
           </div>
         </div>
