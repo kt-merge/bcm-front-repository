@@ -3,9 +3,21 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label"; 
 import { Badge } from "@/components/ui/badge";
 import { Star, LogOut, Edit2 } from "lucide-react";
 import axios from "axios";
+import { useAuth } from "@/hooks/useAuth";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
@@ -59,35 +71,97 @@ const mockAuctions = [
 ];
 
 export default function MyPage() {
+  const { updateNickname } = useAuth();
   const [activeTab, setActiveTab] = useState("activity");
   const [user, setUser] = useState<UserProfile>(mockUser);
+  const [nickname, setNickname] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   // 1. 화면에 진입했을때 useEffect
   useEffect(() => {
-    console.log("맨 처음 렌더링될 때 한 번만 실행");
-    fetchUser();
-  },[]);
+    async function fetchUserAndSetNickname() { 
+      let fetchedUser = mockUser; 
+      try {
+        const response = await axios.get(
+          `${API_BASE_URL}/api/users/me`,
+          { withCredentials: true }
+        );
+        fetchedUser = response.data; 
+        setUser(fetchedUser);
+      } catch (err) {
+        console.error("사용자 정보 가져오기 실패:", err);
+        setUser(mockUser); 
+      } finally {
+        setNickname(fetchedUser.nickname); 
+      }
+    }
+
+    fetchUserAndSetNickname(); 
+  }, []); 
 
   // 2. 서버 호출, axios or fetch
   async function fetchUser() {
     try {
       const response = await axios.get(
         `${API_BASE_URL}/api/users/me`,
+        { withCredentials: true }
       );
-      console.log("사용자 정보 가져오기 성공:", response.data);
       setUser(response.data);
+      setNickname(response.data.nickname);
     } catch (err) {
       console.error("사용자 정보 가져오기 실패:", err);
+      setUser(mockUser);
+      setNickname(mockUser.nickname);
     } finally {
       //setIsLoading(false);
     }
   }
 
-  // 3. 서버 데이터 받음
-  // 4. 화면에 렌더링, useState
-  // 5. 백엔드 api주소 변경 확인
-  // 6. postman으로 api작동 확인
-  // 7. 디버깅 또는 오류 수정
+  // 3. 닉네임 저장 함수
+  const handleSave = async () => {
+    // 닉네임이 비어있으면 저장하지 않음
+    if (!nickname.trim()) {
+      alert("닉네임을 입력해주세요.");
+      return;
+    }
+
+    try {
+      // 1. 서버에 보낼 데이터
+      const requestData = {
+        nickname: nickname,
+      };
+
+      // 2. API 명세서에 맞는 PATCH 요청 보내기
+      await axios.patch(
+        `${API_BASE_URL}/api/users/me/nickname`,
+        requestData,
+        { withCredentials: true }
+      );
+
+      // 3. 저장 성공 시, 현재 페이지의 user 상태를 바로 업데이트
+      alert("닉네임이 성공적으로 변경되었습니다.");
+      setUser(prevUser => ({
+        ...prevUser!,
+        nickname: nickname,
+      }));
+      updateNickname(nickname);
+
+      setIsModalOpen(false);
+
+      // 4. (중요) TODO: 모달 닫기
+      // (다음 단계에서 모달을 자동으로 닫도록 처리합니다)
+
+    } catch (err) {
+      console.error("닉네임 수정 실패:", err);
+      alert("닉네임 수정에 실패했습니다. 다시 시도해주세요.");
+    }
+  };
+
+  // 4. 서버 데이터 받음
+  // 5. 화면에 렌더링, useState
+  // 6. 백엔드 api주소 변경 확인
+  // 7. postman으로 api작동 확인
+  // 8. 디버깅 또는 오류 수정
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }).map((_, i) => (
       <Star
@@ -95,12 +169,6 @@ export default function MyPage() {
         className={`h-4 w-4 ${i < Math.floor(rating) ? "fill-foreground text-foreground" : "text-border"}`}
       />
     ));
-  };
-
-  // 프로필 수정 버튼 클릭 시 실행될 함수
-  const handleEditProfile = () => {
-    const editUrl = "/mypage/edit"; // 1단계에서 만든 페이지 주소
-    window.open(editUrl, "_blank"); // _blank는 '새 탭'을 의미
   };
 
   return (
@@ -118,15 +186,53 @@ export default function MyPage() {
               </p>
             </div>
             <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-2 rounded-lg bg-transparent"
-                onClick={handleEditProfile}
-              >
-                <Edit2 className="h-4 w-4" />
-                프로필 수정
+              <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+                {/* 1. 이 버튼이 이제 모달을 엽니다 (기존 스타일 유지) */}
+                <DialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-2 rounded-lg bg-transparent"
+                    // onClick={handleEditProfile}은 <DialogTrigger>가 대신하므로 삭제합니다.
+                  >
+                    <Edit2 className="h-4 w-4" />
+                    프로필 수정
+                  </Button>
+                </DialogTrigger>
+
+          {/* 2. 모달이 열리면 보일 내용 */}
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>프로필 수정</DialogTitle>
+              <DialogDescription>
+                새 닉네임을 입력하고 저장 버튼을 눌러주세요.
+              </DialogDescription>
+            </DialogHeader>
+
+            {/* --- 닉네임 수정 폼 --- */}
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="nickname" className="text-right">
+                  새 닉네임
+                </Label>
+                <Input
+                  id="nickname"
+                  value={nickname} 
+                  onChange={(e) => setNickname(e.target.value)}
+                  className="col-span-3"
+                  placeholder="새 닉네임을 입력하세요"
+                />
+              </div>
+            </div>
+            {/* --- 폼 끝 --- */}
+            
+            <DialogFooter>
+              <Button onClick={handleSave}> {/* 👈 3. 15-A에서 만든 저장 함수와 연결 */}
+                저장하기
               </Button>
+            </DialogFooter>
+          </DialogContent>
+              </Dialog>
               <Button
                 variant="outline"
                 size="sm"

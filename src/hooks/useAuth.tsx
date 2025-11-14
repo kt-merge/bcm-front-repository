@@ -37,6 +37,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     router.push("/login");
   }, [router]);
 
+  const updateNickname = useCallback((nickname: string) => {
+    setUser((prev) => {
+      if (!prev) return prev; // 로그인 안 되어 있으면 그대로
+      const updatedUser = { ...prev, nickname };
+
+      // localStorage에도 같이 반영
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+
+      return updatedUser;
+    });
+  }, []);
+
   useEffect(() => {
     try {
       const token = localStorage.getItem("accessToken");
@@ -76,7 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, accessToken, login, logout, isLoading }}
+      value={{ user, accessToken, login, logout, isLoading, updateNickname, }}
     >
       {children}
     </AuthContext.Provider>

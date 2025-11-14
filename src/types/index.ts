@@ -12,6 +12,7 @@ export interface AuthContextType {
   isLoading: boolean; // 인증 로딩 상태
   login: (token: string, userData: User) => void;
   logout: () => void;
+  updateNickname: (nickname: string) => void;
 }
 
 // === Bid Types ===
