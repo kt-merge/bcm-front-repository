@@ -94,3 +94,13 @@ export interface ProductListResponse {
   sort: Sort;
   empty: boolean;
 }
+
+// Auth Context 
+export interface AuthContextType {
+  user: User | null;                       
+  accessToken: string | null;               
+  isLoading: boolean;                        
+  login: (token: string, userData: User) => void; 
+  logout: () => void;                        
+  updateNickname: (nickname: string) => void;     
+}

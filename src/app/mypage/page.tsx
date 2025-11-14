@@ -17,7 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Star, LogOut, Edit2 } from "lucide-react";
 import axios from "axios";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/user/useAuth";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
@@ -99,24 +99,6 @@ export default function MyPage() {
     fetchUserAndSetNickname(); 
   }, []); 
 
-  // 2. 서버 호출, axios or fetch
-  async function fetchUser() {
-    try {
-      const response = await axios.get(
-        `${API_BASE_URL}/api/users/me`,
-        { withCredentials: true }
-      );
-      setUser(response.data);
-      setNickname(response.data.nickname);
-    } catch (err) {
-      console.error("사용자 정보 가져오기 실패:", err);
-      setUser(mockUser);
-      setNickname(mockUser.nickname);
-    } finally {
-      //setIsLoading(false);
-    }
-  }
-
   // 3. 닉네임 저장 함수
   const handleSave = async () => {
     // 닉네임이 비어있으면 저장하지 않음
@@ -175,7 +157,7 @@ export default function MyPage() {
     <main className="bg-background min-h-screen py-8 md:py-12">
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
         {/* Profile Header */}
-        <div className="border-border mb-8 border-b pb-8">
+        <div className="bg-card border-border mb-8 rounded-lg border p-6 md:p-8">
           <div className="mb-8 flex items-start justify-between gap-4">
             <div className="flex-1">
               <h1 className="text-foreground text-3xl font-bold md:text-4xl">
@@ -244,7 +226,7 @@ export default function MyPage() {
           </div>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-3 gap-4 md:gap-6">
+          <div className="mt-6 grid grid-cols-3 gap-4 md:gap-6">
             {/* Rating */}
             <div className="bg-card border-border space-y-2 rounded-lg border p-4">
               <p className="text-muted-foreground text-sm font-medium tracking-wide uppercase">
