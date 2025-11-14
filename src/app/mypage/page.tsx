@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -72,32 +73,56 @@ const mockAuctions = [
 
 export default function MyPage() {
   const { updateNickname } = useAuth();
+  const router = useRouter();      
   const [activeTab, setActiveTab] = useState("activity");
   const [user, setUser] = useState<UserProfile>(mockUser);
   const [nickname, setNickname] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   // 1. 화면에 진입했을때 useEffect
-  useEffect(() => {
-    async function fetchUserAndSetNickname() { 
-      let fetchedUser = mockUser; 
+    useEffect(() => {
+    const fetchUserAndSetNickname = async () => {
       try {
         const response = await axios.get(
           `${API_BASE_URL}/api/users/me`,
           { withCredentials: true }
         );
-        fetchedUser = response.data; 
-        setUser(fetchedUser);
-      } catch (err) {
-        console.error("사용자 정보 가져오기 실패:", err);
-        setUser(mockUser); 
-      } finally {
-        setNickname(fetchedUser.nickname); 
-      }
-    }
 
-    fetchUserAndSetNickname(); 
-  }, []); 
+        // 백엔드 응답을 화면에서 쓸 형태로 변환
+        const fetchedUser: UserProfile = {
+          nickname: response.data.nickname ?? mockUser.nickname,
+          joinDate: response.data.joinDate ?? mockUser.joinDate,
+          rating: response.data.rating ?? mockUser.rating,
+          reviews: response.data.reviews ?? mockUser.reviews,
+          wins: response.data.wins ?? mockUser.wins,
+          active: response.data.active ?? mockUser.active,
+        };
+
+        setUser(fetchedUser);
+        setNickname(fetchedUser.nickname);
+      } catch (error) {
+        // 401 / 403 이면 로그인 필요 → 로그인 페이지로 이동
+        if (axios.isAxiosError(error)) {
+          const status = error.response?.status;
+
+          if (status === 401 || status === 403) {
+            console.warn("인증 오류로 401/403 발생:", error);
+            alert("로그인이 필요합니다. 로그인 페이지로 이동합니다.");
+            router.push("/login");
+            return; // ❗ 여기서 함수 종료 (에러 다시 던지지 않음)
+          }
+        }
+
+        // 그 외 에러는 콘솔만 찍고, 목업 유저로 표시
+        console.error("사용자 정보 가져오기 실패:", error);
+        setUser(mockUser);
+        setNickname(mockUser.nickname);
+      }
+    };
+
+    fetchUserAndSetNickname();
+  }, [router]);
+
 
   // 3. 닉네임 저장 함수
   const handleSave = async () => {
