@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Heart } from "lucide-react";
 import { Product } from "@/types";
 import axios from "axios";
+import { motion, AnimatePresence } from "framer-motion";
 
 import { useAuth } from "@/hooks/user/useAuth";
 
@@ -32,6 +33,7 @@ export default function ProductDetail({
   const [showBidForm, setShowBidForm] = useState(false);
   const [isWatchlisted, setIsWatchlisted] = useState(false);
   const [productId, setProductId] = useState<string>("");
+  const [priceKey, setPriceKey] = useState(0);
 
   useEffect(() => {
     const initializeParams = async () => {
@@ -65,18 +67,33 @@ export default function ProductDetail({
       console.log("WebSocket connected");
 
       clientRef.current?.subscribe(`/topic/products/${productId}/product-bids`, (msg) => {
+        const newBid = JSON.parse(msg.body);
         
         setProduct((prev) => {
           if (!prev) return prev;
 
           const updatedProduct = { ...prev };
-          const newBid = JSON.parse(msg.body);
-
           updatedProduct.bidPrice = newBid.price;
           updatedProduct.bidCount += 1;
 
+          // 입찰 기록에 새 입찰 추가
+          if (updatedProduct.productBids) {
+            updatedProduct.productBids = [
+              {
+                productBidId: Date.now(),
+                price: newBid.price,
+                bidTime: new Date().toISOString(),
+                bidderNickname: newBid.bidderNickname || "익명",
+              },
+              ...updatedProduct.productBids,
+            ];
+          }
+
           return updatedProduct;
-        })
+        });
+
+        // 가격 애니메이션 트리거
+        setPriceKey((prev) => prev + 1);
       })
 
     }
@@ -239,9 +256,18 @@ export default function ProductDetail({
               <p className="text-muted-foreground text-sm font-medium tracking-wide uppercase">
                 현재 입찰가
               </p>
-              <p className="text-foreground text-4xl font-bold">
+              <motion.p
+                key={priceKey}
+                className="text-foreground text-4xl font-bold"
+                initial={{ scale: 1, color: "inherit" }}
+                animate={{
+                  scale: [1, 1.1, 1],
+                  color: ["inherit", "#22c55e", "inherit"],
+                }}
+                transition={{ duration: 0.3 }}
+              >
                 ₩{product.bidPrice.toLocaleString()}
-              </p>
+              </motion.p>
               <p className="text-muted-foreground text-sm">
                 {product.bidCount}개 입찰 • 남은 시간 {calculateTimeLeft()}
               </p>
@@ -338,36 +364,46 @@ export default function ProductDetail({
           <div className="space-y-4">
             <h2 className="text-foreground text-2xl font-bold">입찰 기록</h2>
             <div className="max-h-80 space-y-2 overflow-y-auto">
-              {product.productBids && product.productBids.length > 0 ? (
-                product.productBids
-                  .sort(
-                    (a, b) =>
-                      new Date(b.bidTime).getTime() -
-                      new Date(a.bidTime).getTime(),
-                  )
-                  .map((bid) => (
-                    <div
-                      key={bid.productBidId}
-                      className="bg-muted border-border flex items-center justify-between rounded-lg border p-3 text-sm"
-                    >
-                      <div className="flex-1">
-                        <p className="text-foreground font-semibold">
-                          ₩{bid.price.toLocaleString()}
-                        </p>
-                        <p className="text-muted-foreground text-xs">
-                          {new Date(bid.bidTime).toLocaleString("ko-KR")}
-                        </p>
-                      </div>
-                      <span className="text-muted-foreground ml-2 text-xs">
-                        {bid.bidderNickname}
-                      </span>
-                    </div>
-                  ))
-              ) : (
-                <p className="text-muted-foreground text-sm">
-                  아직 입찰 기록이 없습니다.
-                </p>
-              )}
+              <AnimatePresence mode="popLayout">
+                {product.productBids && product.productBids.length > 0 ? (
+                  product.productBids
+                    .sort(
+                      (a, b) =>
+                        new Date(b.bidTime).getTime() -
+                        new Date(a.bidTime).getTime(),
+                    )
+                    .slice(0, 5)
+                    .map((bid, index) => (
+                      <motion.div
+                        key={bid.productBidId}
+                        initial={{ opacity: 0, x: -50 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        transition={{ duration: 0.5 }}
+                        className={`bg-muted border-border flex items-center justify-between rounded-lg border p-3 text-sm 
+                          ${
+                          index === 0 ? "bg-green-50 border-green-300" : ""
+                        }`}
+                      >
+                        <div className="flex-1">
+                          <p className="text-foreground font-semibold">
+                            ₩{bid.price.toLocaleString()}
+                          </p>
+                          <p className="text-muted-foreground text-xs">
+                            {new Date(bid.bidTime).toLocaleString("ko-KR")}
+                          </p>
+                        </div>
+                        <span className="text-muted-foreground ml-2 text-xs">
+                          {bid.bidderNickname}
+                        </span>
+                      </motion.div>
+                    ))
+                ) : (
+                  <p className="text-muted-foreground text-sm">
+                    아직 입찰 기록이 없습니다.
+                  </p>
+                )}
+              </AnimatePresence>
             </div>
           </div>
         </div>
