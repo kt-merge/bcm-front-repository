@@ -308,17 +308,6 @@ export default function ProductDetail({
                       ? "경매 종료"
                       : "입찰하기"}
                 </Button>
-                <Button
-                  onClick={() => setIsWatchlisted(!isWatchlisted)}
-                  variant="outline"
-                  size="lg"
-                  className="w-full rounded-lg"
-                >
-                  <Heart
-                    className={`mr-2 h-4 w-4 ${isWatchlisted ? "fill-current" : ""}`}
-                  />
-                  {isWatchlisted ? "관심상품 등록됨" : "관심상품 등록"}
-                </Button>
               </div>
             ) : (
               <div className="border-border bg-card space-y-4 rounded-lg border p-4">
