@@ -66,14 +66,14 @@ export default function MyPage() {
       };
 
       // 🔹 1) 유저 기본 정보 가져오기
-      const fetchUserAndSetNickname = async () => {
+      const fetchUserInfo = async () => {
         try {
           const response = await axios.get(`${API_BASE_URL}/api/users/me`, {
             withCredentials: true,
           });
 
           const apiUser = response.data;
-          console.log("🔍 /api/users/me 응답:", apiUser);
+          setSellingProducts(apiUser.products ?? []); // 초기화
 
           const fetchedUser: UserProfile = {
             nickname: apiUser.nickname ?? mockUser.nickname,
@@ -117,26 +117,26 @@ export default function MyPage() {
       };
 
       // 🔹 2) 내가 등록한 상품(판매 중 상품) 가져오기
-      const fetchUserProducts = async () => {
-        try {
-          const response = await axios.get(
-            `${API_BASE_URL}/api/users/me/products`,
-            { withCredentials: true },
-          );
+      // const fetchUserProducts = async () => {
+      //   try {
+      //     const response = await axios.get(
+      //       `${API_BASE_URL}/api/users/me/products`,
+      //       { withCredentials: true },
+      //     );
 
-          const data = response.data;
+      //     const data = response.data;
 
-          // 응답이 배열인지 content[]인지 모두 처리
-          const products: Product[] = Array.isArray(data)
-            ? data
-            : (data?.content ?? []);
+      //     // 응답이 배열인지 content[]인지 모두 처리
+      //     const products: Product[] = Array.isArray(data)
+      //       ? data
+      //       : (data?.content ?? []);
 
-          setSellingProducts(products);
-        } catch (error) {
-          console.error("판매중 상품 조회 실패:", error);
-          setSellingProducts([]);
-        }
-      };
+      //     setSellingProducts(products);
+      //   } catch (error) {
+      //     console.error("판매중 상품 조회 실패:", error);
+      //     setSellingProducts([]);
+      //   }
+      // };
 
       // 🔹 3) 내가 구매한 상품(구매 내역) 가져오기
       // ⚠️ 백엔드와 실제로 합의된 엔드포인트로 반드시 수정해야 합니다.
@@ -163,8 +163,8 @@ export default function MyPage() {
       };
 
       // useEffect 실행할 때 세 개 다 호출
-      fetchUserAndSetNickname();
-      fetchUserProducts();
+      fetchUserInfo();
+      // fetchUserProducts();
       fetchPurchasedProducts();
     }, [router]);
 
@@ -254,11 +254,11 @@ export default function MyPage() {
 
   // 🔹 productStatus 값 기준으로 판매중 / 판매완료 분리
   const sellingOngoingProducts = sellingProducts.filter(
-    (product) => product.productStatus !== "SOLD", // 판매 완료가 아닌 것들
+    (product) => product.bidStatus !== "COMPLETED", // 판매 완료가 아닌 것들
   );
 
   const soldOutProducts = sellingProducts.filter(
-    (product) => product.productStatus === "SOLD", // 판매 완료된 것들
+    (product) => product.bidStatus === "COMPLETED", // 판매 완료된 것들
   );
 
   // 🔹 상품 상태 값을 한글 라벨("좋음" 등)로 변환하는 함수
@@ -266,6 +266,7 @@ export default function MyPage() {
     if (!status) return "";
 
     // 백엔드에서 "good", "Good", "GOOD" 섞여 올 수 있으니까 대문자로 통일
+    // yoojin: GOOD, good, Good 섞여서 나올 일 음슴, 2525-11-18
     const upper = status.toUpperCase();
 
     // constants.ts 에서 가져온 매핑 테이블에서 value 비교
@@ -568,7 +569,7 @@ export default function MyPage() {
 
               {/* 입찰 중 (판매 진행 중) */}
               <div className="border-l border-border">
-                <p className="text-muted-foreground">입찰 중</p>
+                <p className="text-muted-foreground">판매 중</p>
                 <p className="mt-1 text-foreground text-xl font-semibold">
                   {sellingOngoingProducts.length}
                 </p>
@@ -576,7 +577,7 @@ export default function MyPage() {
 
               {/* 종료 = 판매 완료 */}
               <div>
-                <p className="text-muted-foreground">종료</p>
+                <p className="text-muted-foreground">판매 종료</p>
                 <p className="mt-1 text-foreground text-xl font-semibold">
                   {soldOutProducts.length}
                 </p>
@@ -587,7 +588,7 @@ export default function MyPage() {
           {/* (1) 판매 중 그룹 */}
           <div className="mb-6">
             <h3 className="mb-3 text-sm font-medium text-muted-foreground">
-              입찰 중
+              판매 중
             </h3>
             <div className="space-y-3">
               {sellingOngoingProducts.length === 0 && (
@@ -616,7 +617,7 @@ export default function MyPage() {
 
                       <div className="mt-2 flex items-center gap-2">
                         <Badge variant="default" className="text-xs">
-                          판매 중
+                          {product.bidStatus === "NOT_BIDDED" ? "입찰 없음" : "경매 중"}
                         </Badge>
                         <p className="text-muted-foreground text-xs">
                           상태: {getProductStatusLabel(product.productStatus)}
@@ -645,7 +646,7 @@ export default function MyPage() {
           {/* (2) 판매 완료 그룹 */}
           <div>
             <h3 className="mb-3 text-sm font-medium text-muted-foreground">
-              판매 완료
+              판매 종료
             </h3>
             <div className="space-y-3">
               {soldOutProducts.length === 0 && (
