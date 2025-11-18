@@ -185,47 +185,36 @@ export default function MyPage() {
 
       try {
         // 1. 서버에 보낼 데이터들
-        const nicknameRequestData = {
+        const userInfoRequestData = {
           nickname: nickname,
-        };
-
-        const phoneRequestData = {
           phoneNumber: phoneNumber,
         };
 
-        // 2-1. 닉네임 PATCH 요청
-        await axios.patch(
-          `${API_BASE_URL}/api/users/me/nickname`,
-          nicknameRequestData,
+        // 2-1. UserInfo PUT 요청
+        const result = await axios.put(
+          `${API_BASE_URL}/api/users/me`,
+          userInfoRequestData,
           {
             withCredentials: true,
           },
         );
 
-        // 2-2. 전화번호 PATCH 요청
-        // ⚠️ 여기 엔드포인트 URL은 백엔드에서 정해준 것과 맞춰야 합니다.
-        // 예시로 /api/users/me/phone-number 로 작성해 둡니다.
-        await axios.patch(
-          `${API_BASE_URL}/api/users/me/phoneNumber`,
-          phoneRequestData,
-          {
-            withCredentials: true,
-          },
-        );
+        if(result.status === 200) {
+          // 3. 저장 성공 시, 현재 페이지의 user 상태를 바로 업데이트
+          alert("프로필이 성공적으로 변경되었습니다.");
+          
+          setUser((prevUser) => ({
+            ...prevUser!,
+            nickname: nickname,
+            phoneNumber: phoneNumber,
+          }));
 
-        // 3. 저장 성공 시, 현재 페이지의 user 상태를 바로 업데이트
-        alert("프로필이 성공적으로 변경되었습니다.");
-        setUser((prevUser) => ({
-          ...prevUser!,
-          nickname: nickname,
-          phoneNumber: phoneNumber,
-        }));
+          // 전역 auth 컨텍스트의 닉네임도 업데이트
+          updateNickname(nickname);
 
-        // 전역 auth 컨텍스트의 닉네임도 업데이트
-        updateNickname(nickname);
-
-        // 모달 닫기
-        setIsModalOpen(false);
+          // 모달 닫기
+          setIsModalOpen(false);
+        }
       } catch (err) {
         console.error("프로필 수정 실패:", err);
         alert("프로필 수정에 실패했습니다. 다시 시도해주세요.");
