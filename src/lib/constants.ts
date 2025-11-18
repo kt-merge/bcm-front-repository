@@ -16,8 +16,8 @@ export const PRODUCT_CATEGORIES = [
  */
 export const PRODUCT_STATUS = [
   { label: "좋음", value: "GOOD" },
-  { label: "나쁨", value: "BAD" },
-  { label: "새상품", value: "NEW" },
+  { label: "보통", value: "AVERAGE" },
+  { label: "나쁨", value: "BAD" },  
 ];
 
 /**
