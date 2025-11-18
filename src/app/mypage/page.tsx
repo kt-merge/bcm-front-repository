@@ -1,6 +1,6 @@
 "use client";
 
-import type { Product } from "@/types";
+import type { Product, WinnerDetails } from "@/types";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -52,7 +52,7 @@ export default function MyPage() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [sellingProducts, setSellingProducts] = useState<Product[]>([]);
-  const [purchasedProducts, setPurchasedProducts] = useState<Product[]>([]);
+  const [purchasedProducts, setPurchasedProducts] = useState<WinnerDetails[]>([]);
 
     // 1. 화면에 진입했을때 useEffect
     useEffect(() => {
@@ -73,7 +73,10 @@ export default function MyPage() {
           });
 
           const apiUser = response.data;
+          const winners = apiUser.winners?? [];
+          console.log("Fetched user info:", apiUser);
           setSellingProducts(apiUser.products ?? []); // 초기화
+          setPurchasedProducts(winners ?? []); // 초기화
 
           const fetchedUser: UserProfile = {
             nickname: apiUser.nickname ?? mockUser.nickname,
@@ -82,8 +85,8 @@ export default function MyPage() {
               : mockUser.joinDate,
             rating: apiUser.rating ?? mockUser.rating,
             reviews: apiUser.reviews ?? mockUser.reviews,
-            wins: apiUser.wins ?? mockUser.wins,
-            active: apiUser.active ?? mockUser.active,
+            wins: apiUser.winners.length ?? 0,
+            active: apiUser.productBids.length ?? 0,
 
             // ✅ 전화번호: 서버에서 값이 비어 있거나(null/undefined/빈문자열) 하면 목업 값으로 대체
             //  - 백엔드 필드명이 phoneNumber가 아니면 여기만 바꾸면 됨
@@ -141,31 +144,31 @@ export default function MyPage() {
       // 🔹 3) 내가 구매한 상품(구매 내역) 가져오기
       // ⚠️ 백엔드와 실제로 합의된 엔드포인트로 반드시 수정해야 합니다.
       // 예: /api/users/me/purchases, /api/users/me/bids, /api/users/me/orders 등
-      const fetchPurchasedProducts = async () => {
-        try {
-          const response = await axios.get(
-            `${API_BASE_URL}/api/users/me/purchases`, // ✅ 나중에 백엔드에서 정해준 URL로 변경
-            { withCredentials: true },
-          );
+      // const fetchPurchasedProducts = async () => {
+      //   try {
+      //     const response = await axios.get(
+      //       `${API_BASE_URL}/api/users/me/purchases`, // ✅ 나중에 백엔드에서 정해준 URL로 변경
+      //       { withCredentials: true },
+      //     );
 
-          const data = response.data;
+      //     const data = response.data;
 
-          // 응답이 배열인지 content[]인지 모두 처리
-          const products: Product[] = Array.isArray(data)
-            ? data
-            : (data?.content ?? []);
+      //     // 응답이 배열인지 content[]인지 모두 처리
+      //     const products: Product[] = Array.isArray(data)
+      //       ? data
+      //       : (data?.content ?? []);
 
-          setPurchasedProducts(products);
-        } catch (error) {
-          console.error("구매 내역 조회 실패:", error);
-          setPurchasedProducts([]); // 실패 시 깔끔하게 빈 배열
-        }
-      };
+      //     setPurchasedProducts(products);
+      //   } catch (error) {
+      //     console.error("구매 내역 조회 실패:", error);
+      //     setPurchasedProducts([]); // 실패 시 깔끔하게 빈 배열
+      //   }
+      // };
 
       // useEffect 실행할 때 세 개 다 호출
       fetchUserInfo();
       // fetchUserProducts();
-      fetchPurchasedProducts();
+      // fetchPurchasedProducts();
     }, [router]);
 
 
@@ -412,7 +415,7 @@ export default function MyPage() {
               <div>
                 <p className="text-muted-foreground">전체</p>
                 <p className="mt-1 text-foreground text-xl font-semibold">
-                  {purchasedProducts.length}
+                  {purchasedProducts.length + purchasingOngoingProducts.length}
                 </p>
               </div>
 
@@ -426,9 +429,9 @@ export default function MyPage() {
 
               {/* 종료 = 구매 완료 */}
               <div>
-                <p className="text-muted-foreground">종료</p>
+                <p className="text-muted-foreground">낙찰</p>
                 <p className="mt-1 text-foreground text-xl font-semibold">
-                  {purchasingCompletedProducts.length}
+                  {purchasedProducts.length}
                 </p>
               </div>
             </div>
@@ -498,7 +501,7 @@ export default function MyPage() {
               구매 완료
             </h3>
             <div className="space-y-3">
-              {purchasingCompletedProducts.length === 0 && (
+              {purchasedProducts.length === 0 && (
                 <div className="py-8 text-center">
                   <p className="text-muted-foreground mb-4">
                     구매 완료된 상품이 없습니다.
@@ -508,18 +511,17 @@ export default function MyPage() {
                     variant="outline"
                     className="rounded-lg bg-transparent"
                   >
-                    <Link href="/">상품 둘러보러 가기</Link>
                   </Button>
                 </div>
               )}
 
-              {purchasingCompletedProducts.map((product) => (
-                <Link key={product.id} href={`/products/${product.id}`}>
+              {purchasedProducts.map((product) => (
+                <Link key={product.productId} href={`/products/${product.productId}`}>
                   <div className="border-border hover:bg-muted flex cursor-pointer items-center justify-between rounded-lg border p-4 transition-colors">
                     <div className="flex-1">
                       {/* 상품 이름 */}
                       <p className="text-foreground font-medium">
-                        {product.name}
+                        {product.productName}
                       </p>
 
                       <div className="mt-2 flex items-center gap-2">
@@ -527,7 +529,7 @@ export default function MyPage() {
                           구매 완료
                         </Badge>
                         <p className="text-muted-foreground text-xs">
-                          상태: {getProductStatusLabel(product.productStatus)}
+                          상태: {getProductStatusLabel(product.productStatus.toString())}
                         </p>
                       </div>
                     </div>
@@ -535,9 +537,7 @@ export default function MyPage() {
                     <div className="text-right">
                       <p className="text-foreground text-lg font-bold">
                         ₩
-                        {(
-                          product.bidPrice ?? product.startPrice
-                        ).toLocaleString()}
+                        {(product.bidPrice).toLocaleString()}
                       </p>
                       <p className="text-muted-foreground mt-1 text-xs font-medium">
                         종료
@@ -659,7 +659,6 @@ export default function MyPage() {
                     variant="outline"
                     className="rounded-lg bg-transparent"
                   >
-                    <Link href="/products/create">상품 등록하러 가기</Link>
                   </Button>
                 </div>
               )}

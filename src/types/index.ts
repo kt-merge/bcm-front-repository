@@ -63,6 +63,13 @@ export interface Product {
   productBids: ProductBid[];
 }
 
+export interface WinnerDetails {
+  bidPrice: number;
+  productId: string;
+  productName: string;
+  productStatus: number;
+}
+
 export interface ProductBid {
   productBidId: number;
   price: number;
