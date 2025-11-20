@@ -188,6 +188,12 @@ export default function MyPage() {
         return;
       }
 
+      if (nickname.trim().length > 8) {
+        alert("닉네임은 8자 이하로 입력해주세요.");
+        return;
+      }
+
+
       // 전화번호가 비어있으면 저장하지 않음
       if (!phoneNumber.trim()) {
         alert("전화번호를 입력해주세요.");
@@ -328,6 +334,7 @@ export default function MyPage() {
                       <Input
                         id="nickname"
                         value={nickname}
+                        maxLength={8}
                         onChange={(e) => setNickname(e.target.value)}
                         className="col-span-3"
                         placeholder="새 닉네임을 입력하세요"
@@ -442,9 +449,6 @@ export default function MyPage() {
                       {/* 입찰가 있으면 bidPrice, 없으면 시작가(startPrice) */}
                       <p className="text-foreground text-lg font-bold">
                         ₩{product.price.toLocaleString()}
-                      </p>
-                      <p className="text-primary mt-1 text-xs font-medium">
-                        진행 중
                       </p>
                     </div>
                   </Link>
@@ -581,7 +585,7 @@ export default function MyPage() {
 
                       <div className="mt-2 flex items-center gap-2">
                         <Badge variant="default" className="text-xs">
-                          {product.bidStatus === "NOT_BIDDED" ? "입찰 없음" : "경매 중"}
+                          {product.bidStatus === "NOT_BIDDED" ? "입찰 없음" : "진행 중"}
                         </Badge>
                         <p className="text-muted-foreground text-xs">
                           상태: {getProductStatusLabel(product.productStatus)}
@@ -593,9 +597,6 @@ export default function MyPage() {
                       {/* 입찰가 있으면 bidPrice, 없으면 시작가(startPrice) */}
                       <p className="text-foreground text-lg font-bold">
                         ₩{(product.bidPrice ?? product.startPrice).toLocaleString()}
-                      </p>
-                      <p className="text-primary mt-1 text-xs font-medium">
-                        진행 중
                       </p>
                     </div>
                   </Link>
