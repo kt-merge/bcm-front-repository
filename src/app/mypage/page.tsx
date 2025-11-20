@@ -437,12 +437,6 @@ export default function MyPage() {
                       <p className="text-foreground font-medium">
                         {product.productName}
                       </p>
-
-                      <div className="mt-2 flex items-center gap-2">
-                        <Badge variant="default" className="text-xs">
-                          진행 중
-                        </Badge>
-                      </div>
                     </div>
 
                     <div className="text-right">
@@ -584,9 +578,6 @@ export default function MyPage() {
                       </p>
 
                       <div className="mt-2 flex items-center gap-2">
-                        <Badge variant="default" className="text-xs">
-                          {product.bidStatus === "NOT_BIDDED" ? "입찰 없음" : "진행 중"}
-                        </Badge>
                         <p className="text-muted-foreground text-xs">
                           상태: {getProductStatusLabel(product.productStatus)}
                         </p>
