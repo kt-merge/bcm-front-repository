@@ -4,7 +4,7 @@ import type { MypageProductBid, Product, WinnerDetails } from "@/types";
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import axios from "axios";
+import { apiGet, apiPut } from "@/lib/api";
 import { useAuth } from "@/hooks/user/useAuth";
 import { PRODUCT_STATUS } from "@/lib/constants";
 
@@ -24,8 +24,6 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Edit2 } from "lucide-react";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
-
 // --- 초기 데이터 및 타입 ---
 const INITIAL_USER = {
   nickname: "익명 사용자",
@@ -41,6 +39,17 @@ type UserProfile = {
   rating: number;
   reviews: number;
   phoneNumber: string;
+};
+
+type ApiUserResponse = {
+  nickname?: string;
+  createdAt?: string;
+  rating?: number;
+  reviews?: number;
+  phoneNumber?: string;
+  products?: Product[];
+  winners?: WinnerDetails[];
+  productBids?: MypageProductBid[];
 };
 
 // --- 유틸리티 함수 ---
@@ -138,11 +147,7 @@ export default function MyPage() {
         const token = localStorage.getItem("accessToken");
         if (!token) return; // 토큰이 없으면 중단 (추가 안전장치)
 
-        const response = await axios.get(`${API_BASE_URL}/api/users/me`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        const apiUser = response.data;
+        const apiUser = await apiGet<ApiUserResponse>("/api/users/me");
 
         // 리스트 데이터 세팅
         setSellingProducts(apiUser.products ?? []);
@@ -165,11 +170,7 @@ export default function MyPage() {
         setUser(fetchedUser);
         setNicknameInput(fetchedUser.nickname);
         setPhoneNumberInput(fetchedUser.phoneNumber);
-      } catch (error) {
-        if (axios.isAxiosError(error)) {
-          const status = error.response?.status;
-          if (status === 401 || status === 403) return;
-        }
+      } catch {
         // 에러 시 초기화
         setUser(INITIAL_USER);
         setNicknameInput(INITIAL_USER.nickname);
@@ -191,24 +192,21 @@ export default function MyPage() {
     if (!trimmedPhone) return alert("전화번호를 입력해주세요.");
 
     try {
-      const result = await axios.put(
-        `${API_BASE_URL}/api/users/me`,
-        { nickname: trimmedNick, phoneNumber: trimmedPhone },
-        { withCredentials: true },
-      );
+      await apiPut("/api/users/me", {
+        nickname: trimmedNick,
+        phoneNumber: trimmedPhone,
+      });
 
-      if (result.status === 200) {
-        alert("프로필이 성공적으로 변경되었습니다.");
+      alert("프로필이 성공적으로 변경되었습니다.");
 
-        setUser((prev) => ({
-          ...prev,
-          nickname: trimmedNick,
-          phoneNumber: trimmedPhone,
-        }));
-        updateNickname(trimmedNick);
-        setIsModalOpen(false);
-      }
-    } catch (err) {
+      setUser((prev) => ({
+        ...prev,
+        nickname: trimmedNick,
+        phoneNumber: trimmedPhone,
+      }));
+      updateNickname(trimmedNick);
+      setIsModalOpen(false);
+    } catch {
       alert("프로필 수정에 실패했습니다. 다시 시도해주세요.");
     }
   };
