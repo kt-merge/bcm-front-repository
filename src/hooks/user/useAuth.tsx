@@ -10,85 +10,79 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import { User, AuthContextType } from "@/types";
-import axios from "axios";
+import { setAccessToken as setGlobalAccessToken, apiPost } from "@/lib/api";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
+  // Access Token은 메모리 상태로만 관리 (localStorage 사용 안 함)
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const login = useCallback((token: string, userData: User) => {
+    // 메모리 상태에만 저장
     setAccessToken(token);
     setUser(userData);
-    localStorage.setItem("accessToken", token);
-    localStorage.setItem("user", JSON.stringify(userData));
-    axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    // API fetch wrapper에 토큰 설정
+    setGlobalAccessToken(token);
   }, []);
 
-  const logout = useCallback(() => {
-    setAccessToken(null);
-    setUser(null);
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("user");
-    delete axios.defaults.headers.common["Authorization"];
-    router.push("/login");
+  const logout = useCallback(async () => {
+    try {
+      // 로그아웃 API 호출 (서버에서 Refresh Token 쿠키 삭제)
+      await apiPost("/api/auth/logout");
+    } catch (error) {
+      console.error("로그아웃 API 호출 실패:", error);
+    } finally {
+      // 클라이언트 상태 초기화
+      setAccessToken(null);
+      setUser(null);
+      setGlobalAccessToken(null);
+      router.push("/login");
+    }
   }, [router]);
 
   const updateNickname = useCallback((nickname: string) => {
     setUser((prev) => {
-      if (!prev) return prev; // 로그인 안 되어 있으면 그대로
-      const updatedUser = { ...prev, nickname };
-
-      // localStorage에도 같이 반영
-      localStorage.setItem("user", JSON.stringify(updatedUser));
-
-      return updatedUser;
+      if (!prev) return prev;
+      return { ...prev, nickname };
     });
   }, []);
 
+  // 페이지 새로고침 시 토큰 복원 불가 (메모리 상태이므로)
+  // 대신 /api/auth/me 엔드포인트를 호출해서 사용자 정보 복원 가능
   useEffect(() => {
-    try {
-      const token = localStorage.getItem("accessToken");
-      const userData = localStorage.getItem("user");
-      if (token && userData) {
-        setAccessToken(token);
-        setUser(JSON.parse(userData));
-        axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-      }
-    } catch (error) {
-      console.error("localStorage에서 인증 정보 복원 실패:", error);
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("user");
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+    const checkAuth = async () => {
+      try {
+        // Refresh Token이 쿠키에 있다면 자동으로 전송됨
+        // 백엔드에서 Refresh Token 검증 후 새 Access Token 발급
+        const response = await apiPost<{ accessToken: string }>(
+          "/api/auth/refresh-on-load",
+        );
 
-  // Axios Interceptor (자동 로그아웃)
-  useEffect(() => {
-    const responseInterceptor = axios.interceptors.response.use(
-      (response) => response,
-      async (error) => {
-        if (axios.isAxiosError(error) && error.response?.status === 401) {
-          console.error("401 Unauthorized. 토큰 만료. 강제 로그아웃.");
-          alert("인증이 만료되었습니다. 다시 로그인해주세요.");
+        if (response.accessToken) {
+          setAccessToken(response.accessToken);
+          setGlobalAccessToken(response.accessToken);
 
-          logout();
+          // 사용자 정보 가져오기
+          const userResponse = await apiPost<User>("/api/users/me");
+          setUser(userResponse);
         }
-        return Promise.reject(error);
-      },
-    );
-    return () => {
-      axios.interceptors.response.eject(responseInterceptor);
+      } catch {
+        console.log("인증 정보 없음 또는 만료됨");
+      } finally {
+        setIsLoading(false);
+      }
     };
-  }, [logout]);
+
+    checkAuth();
+  }, []);
 
   return (
     <AuthContext.Provider
-      value={{ user, accessToken, login, logout, isLoading, updateNickname, }}
+      value={{ user, accessToken, login, logout, isLoading, updateNickname }}
     >
       {children}
     </AuthContext.Provider>

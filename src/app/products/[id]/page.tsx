@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Product } from "@/types";
-import axios from "axios";
+import { apiGet } from "@/lib/api";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { useAuth } from "@/hooks/user/useAuth";
@@ -67,10 +67,8 @@ export default function ProductDetail({
     const fetchProduct = async () => {
       try {
         setIsLoading(true);
-        const response = await axios.get<Product>(
-          `${API_BASE_URL}/api/products/${productId}`,
-        );
-        setProductData(response.data);
+        const product = await apiGet<Product>(`/api/products/${productId}`);
+        setProductData(product);
       } catch (err) {
         console.error("상품 조회 실패:", err);
         // API 호출 실패 시 목 데이터에서 찾기

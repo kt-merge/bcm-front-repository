@@ -5,10 +5,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, Loader2 } from "lucide-react";
-import axios from "axios";
+import { apiPost, apiGet, setAccessToken } from "@/lib/api";
 import { useAuth } from "@/hooks/user/useAuth";
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+import { SignInResponse, User } from "@/types";
 
 export default function Login() {
   const router = useRouter();
@@ -31,29 +30,26 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      const loginResponse = await axios.post(
-        `${API_BASE_URL}/api/auth/sign-in`,
-        { email, password },
-      );
-      const { accessToken } = loginResponse.data;
+      const loginResponse = await apiPost<SignInResponse>("/api/auth/sign-in", {
+        email,
+        password,
+      });
+      const { accessToken } = loginResponse;
       if (!accessToken) {
         throw new Error("로그인 응답에 accessToken이 없습니다.");
       }
-      const userResponse = await axios.get(`${API_BASE_URL}/api/users/me`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-      const userData = userResponse.data;
+
+      // Access Token을 전역으로 설정
+      setAccessToken(accessToken);
+
+      const userData = await apiGet<User>("/api/users/me");
       login(accessToken, userData);
 
       router.push("/");
     } catch (err) {
       console.error(err);
-      if (
-        axios.isAxiosError(err) &&
-        (err.response?.status === 401 || err.response?.status === 404)
-      ) {
+      const error = err as Error;
+      if (error.message.includes("401") || error.message.includes("404")) {
         setError("이메일 또는 비밀번호가 올바르지 않습니다.");
       } else {
         setError("로그인에 실패했습니다. 다시 시도해주세요.");

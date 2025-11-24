@@ -2,16 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
+import { apiPost } from "@/lib/api";
 
 import { useAuth } from "@/hooks/user/useAuth";
 import { ProductFormData } from "@/types";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
-
 export function useCreateProductForm() {
   const router = useRouter();
-  const { user, isLoading: isAuthLoading, accessToken } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
 
   const [step, setStep] = useState(1);
   const defaultBidEndDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
@@ -89,20 +87,16 @@ export function useCreateProductForm() {
     setError(null);
 
     try {
+      // S3에 이미지 업로드
       for (const file of imageFiles) {
-        const presignedResponse = await axios.post(
-          `${API_BASE_URL}/api/s3/upload-url`,
+        const presignedResponse = await apiPost<{ url: string }>(
+          "/api/s3/upload-url",
           {
             fileName: file.name,
           },
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          },
         );
 
-        await fetch(presignedResponse.data.url, {
+        await fetch(presignedResponse.url, {
           method: "PUT",
           headers: {
             "Content-Type": file.type,
@@ -143,7 +137,7 @@ export function useCreateProductForm() {
         bidEndDateString = `${formData.bidEndDate}T${hours}:${minutes}:${seconds}`;
       }
 
-      const jsonData = JSON.stringify({
+      const productData = {
         name: formData.name,
         description: formData.description,
         category: formData.category,
@@ -151,19 +145,15 @@ export function useCreateProductForm() {
         bidEndDate: bidEndDateString,
         productStatus: formData.productStatus,
         imageUrl: imageFiles[0].name,
-      });
+      };
 
-      await axios
-        .post(`${API_BASE_URL}/api/products`, jsonData, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-        })
-        .then((result) => {
-          alert("상품이 성공적으로 등록됐습니다.");
-          router.push(`/products/${result.data.id}`);
-        });
+      const result = await apiPost<{ id: number }>(
+        "/api/products",
+        productData,
+      );
+
+      alert("상품이 성공적으로 등록됐습니다.");
+      router.push(`/products/${result.id}`);
     } catch (err) {
       console.error("상품 등록 실패:", err);
       setError("상품 등록에 실패했습니다. 다시 시도해주세요.");

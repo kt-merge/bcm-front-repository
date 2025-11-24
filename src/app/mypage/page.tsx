@@ -4,7 +4,7 @@ import type { MypageProductBid, Product, WinnerDetails } from "@/types";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import axios from "axios";
+import { apiGet, apiPut } from "@/lib/api";
 import { useAuth } from "@/hooks/user/useAuth";
 import { PRODUCT_STATUS } from "@/lib/constants";
 
@@ -23,8 +23,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Edit2 } from "lucide-react";
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
 // 초기화용 목업 데이터
 const INITIAL_USER = {
@@ -73,19 +71,19 @@ export default function MyPage() {
 
   // 상품 목록 State
   const [sellingProducts, setSellingProducts] = useState<Product[]>([]);
-  const [purchaseOngoingProducts, setPurchaseOngoingProducts] = useState<MypageProductBid[]>([]);
-  const [purchasedProducts, setPurchasedProducts] = useState<WinnerDetails[]>([]);
+  const [purchaseOngoingProducts, setPurchaseOngoingProducts] = useState<
+    MypageProductBid[]
+  >([]);
+  const [purchasedProducts, setPurchasedProducts] = useState<WinnerDetails[]>(
+    [],
+  );
 
   // --- 1. 데이터 불러오기 (useEffect) ---
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
-        const token = localStorage.getItem("accessToken");
-        const response = await axios.get(`${API_BASE_URL}/api/users/me`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        const apiUser = response.data;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const apiUser = await apiGet<any>("/api/users/me");
 
         // 상품 리스트 상태 업데이트
         setSellingProducts(apiUser.products ?? []);
@@ -110,15 +108,7 @@ export default function MyPage() {
         setUser(fetchedUser);
         setNicknameInput(fetchedUser.nickname);
         setPhoneNumberInput(fetchedUser.phoneNumber);
-
-      } catch (error) {
-        if (axios.isAxiosError(error)) {
-          const status = error.response?.status;
-          // 인증 오류(401, 403) 발생 시 처리 로직이 필요하면 여기에 추가
-          if (status === 401 || status === 403) {
-            return;
-          }
-        }
+      } catch {
         // 에러 발생 시 목업 데이터 유지
         setUser(INITIAL_USER);
         setNicknameInput(INITIAL_USER.nickname);
@@ -150,26 +140,20 @@ export default function MyPage() {
         phoneNumber: phoneNumberInput,
       };
 
-      const result = await axios.put(
-        `${API_BASE_URL}/api/users/me`,
-        userInfoRequestData,
-        { withCredentials: true }
-      );
+      await apiPut("/api/users/me", userInfoRequestData);
 
-      if (result.status === 200) {
-        alert("프로필이 성공적으로 변경되었습니다.");
+      alert("프로필이 성공적으로 변경되었습니다.");
 
-        // 화면 데이터 즉시 업데이트
-        setUser((prev) => ({
-          ...prev,
-          nickname: nicknameInput,
-          phoneNumber: phoneNumberInput,
-        }));
+      // 화면 데이터 즉시 업데이트
+      setUser((prev) => ({
+        ...prev,
+        nickname: nicknameInput,
+        phoneNumber: phoneNumberInput,
+      }));
 
-        // 전역 상태 업데이트 및 모달 닫기
-        updateNickname(nicknameInput);
-        setIsModalOpen(false);
-      }
+      // 전역 상태 업데이트 및 모달 닫기
+      updateNickname(nicknameInput);
+      setIsModalOpen(false);
     } catch (err) {
       alert("프로필 수정에 실패했습니다. 다시 시도해주세요.");
     }
@@ -177,17 +161,16 @@ export default function MyPage() {
 
   // --- 3. 데이터 필터링 (판매 중 / 판매 완료 구분) ---
   const sellingOngoingProducts = sellingProducts.filter(
-    (product) => product.bidStatus !== "COMPLETED"
+    (product) => product.bidStatus !== "COMPLETED",
   );
 
   const soldOutProducts = sellingProducts.filter(
-    (product) => product.bidStatus === "COMPLETED"
+    (product) => product.bidStatus === "COMPLETED",
   );
 
   return (
     <main className="bg-background min-h-screen py-8 md:py-12">
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-        
         {/* --- 프로필 헤더 섹션 --- */}
         <div className="bg-card border-border mb-8 rounded-lg border p-6 md:p-8">
           <div className="flex items-center justify-between gap-4">
@@ -199,7 +182,7 @@ export default function MyPage() {
                 {user.joinDate}
               </p>
             </div>
-            
+
             <div className="flex gap-2">
               {/* 프로필 수정 모달 */}
               <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
@@ -268,23 +251,23 @@ export default function MyPage() {
           <h2 className="mb-4 text-lg font-semibold">구매 내역</h2>
 
           {/* 상단 요약 바 */}
-          <div className="mb-6 rounded-lg border border-border bg-card p-4">
+          <div className="border-border bg-card mb-6 rounded-lg border p-4">
             <div className="grid grid-cols-3 text-center text-sm">
               <div>
                 <p className="text-muted-foreground">전체</p>
-                <p className="mt-1 text-foreground text-xl font-semibold">
+                <p className="text-foreground mt-1 text-xl font-semibold">
                   {purchasedProducts.length + purchaseOngoingProducts.length}
                 </p>
               </div>
-              <div className="border-l border-border">
+              <div className="border-border border-l">
                 <p className="text-muted-foreground">구매 중</p>
-                <p className="mt-1 text-foreground text-xl font-semibold">
+                <p className="text-foreground mt-1 text-xl font-semibold">
                   {purchaseOngoingProducts.length}
                 </p>
               </div>
               <div>
                 <p className="text-muted-foreground">구매 완료</p>
-                <p className="mt-1 text-foreground text-xl font-semibold">
+                <p className="text-foreground mt-1 text-xl font-semibold">
                   {purchasedProducts.length}
                 </p>
               </div>
@@ -293,25 +276,45 @@ export default function MyPage() {
 
           {/* 구매 중 리스트 */}
           <div className="mb-6">
-            <h3 className="mb-3 text-sm font-medium text-muted-foreground">구매 중</h3>
+            <h3 className="text-muted-foreground mb-3 text-sm font-medium">
+              구매 중
+            </h3>
             <div className="space-y-3">
               {purchaseOngoingProducts.length === 0 && (
                 <div className="py-8 text-center">
-                  <p className="text-muted-foreground mb-4">현재 구매 중인 상품이 없습니다.</p>
-                  <Button asChild variant="outline" className="rounded-lg bg-transparent">
+                  <p className="text-muted-foreground mb-4">
+                    현재 구매 중인 상품이 없습니다.
+                  </p>
+                  <Button
+                    asChild
+                    variant="outline"
+                    className="rounded-lg bg-transparent"
+                  >
                     <Link href="/">상품 둘러보러 가기</Link>
                   </Button>
                 </div>
               )}
               {purchaseOngoingProducts.map((product) => (
-                <div key={product.productId} className="hover:bg-muted cursor-pointer p-4 transition-colors border-b last:border-b-0">
-                  <Link href={`/products/${product.productId}`} className="flex items-center justify-between">
+                <div
+                  key={product.productId}
+                  className="hover:bg-muted cursor-pointer border-b p-4 transition-colors last:border-b-0"
+                >
+                  <Link
+                    href={`/products/${product.productId}`}
+                    className="flex items-center justify-between"
+                  >
                     <div className="flex-1">
-                      <p className="text-foreground font-medium">{product.productName}</p>
+                      <p className="text-foreground font-medium">
+                        {product.productName}
+                      </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-foreground text-lg font-bold">₩{product.price.toLocaleString()}</p>
-                      <p className="text-muted-foreground text-xs">전체 입찰 횟수: {product.bidCount}</p>
+                      <p className="text-foreground text-lg font-bold">
+                        ₩{product.price.toLocaleString()}
+                      </p>
+                      <p className="text-muted-foreground text-xs">
+                        전체 입찰 횟수: {product.bidCount}
+                      </p>
                     </div>
                   </Link>
                 </div>
@@ -321,26 +324,43 @@ export default function MyPage() {
 
           {/* 구매 완료 리스트 */}
           <div>
-            <h3 className="mb-3 text-sm font-medium text-muted-foreground">구매 완료</h3>
+            <h3 className="text-muted-foreground mb-3 text-sm font-medium">
+              구매 완료
+            </h3>
             <div className="space-y-3">
               {purchasedProducts.length === 0 && (
                 <div className="py-8 text-center">
-                  <p className="text-muted-foreground mb-4">구매 완료된 상품이 없습니다.</p>
+                  <p className="text-muted-foreground mb-4">
+                    구매 완료된 상품이 없습니다.
+                  </p>
                 </div>
               )}
               {purchasedProducts.map((product) => (
-                <Link key={product.productId} href={`/products/${product.productId}`}>
+                <Link
+                  key={product.productId}
+                  href={`/products/${product.productId}`}
+                >
                   <div className="border-border hover:bg-muted flex cursor-pointer items-center justify-between rounded-lg border p-4 transition-colors">
                     <div className="flex-1">
-                      <p className="text-foreground font-medium">{product.productName}</p>
+                      <p className="text-foreground font-medium">
+                        {product.productName}
+                      </p>
                       <div className="mt-2 flex items-center gap-2">
-                        <Badge variant="secondary" className="text-xs">구매 완료</Badge>
-                        <p className="text-muted-foreground text-xs">상태: {getProductStatusLabel(product.productStatus)}</p>
+                        <Badge variant="secondary" className="text-xs">
+                          구매 완료
+                        </Badge>
+                        <p className="text-muted-foreground text-xs">
+                          상태: {getProductStatusLabel(product.productStatus)}
+                        </p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-foreground text-lg font-bold">₩{(product.bidPrice).toLocaleString()}</p>
-                      <p className="text-muted-foreground mt-1 text-xs font-medium">종료</p>
+                      <p className="text-foreground text-lg font-bold">
+                        ₩{product.bidPrice.toLocaleString()}
+                      </p>
+                      <p className="text-muted-foreground mt-1 text-xs font-medium">
+                        종료
+                      </p>
                     </div>
                   </div>
                 </Link>
@@ -354,49 +374,78 @@ export default function MyPage() {
           <h2 className="mb-4 text-lg font-semibold">판매 내역</h2>
 
           {/* 상단 요약 바 */}
-          <div className="mb-6 rounded-lg border border-border bg-card p-4">
+          <div className="border-border bg-card mb-6 rounded-lg border p-4">
             <div className="grid grid-cols-3 text-center text-sm">
               <div>
                 <p className="text-muted-foreground">전체</p>
-                <p className="mt-1 text-foreground text-xl font-semibold">{sellingProducts.length}</p>
+                <p className="text-foreground mt-1 text-xl font-semibold">
+                  {sellingProducts.length}
+                </p>
               </div>
-              <div className="border-l border-border">
+              <div className="border-border border-l">
                 <p className="text-muted-foreground">판매 중</p>
-                <p className="mt-1 text-foreground text-xl font-semibold">{sellingOngoingProducts.length}</p>
+                <p className="text-foreground mt-1 text-xl font-semibold">
+                  {sellingOngoingProducts.length}
+                </p>
               </div>
               <div>
                 <p className="text-muted-foreground">판매 완료</p>
-                <p className="mt-1 text-foreground text-xl font-semibold">{soldOutProducts.length}</p>
+                <p className="text-foreground mt-1 text-xl font-semibold">
+                  {soldOutProducts.length}
+                </p>
               </div>
             </div>
           </div>
 
           {/* 판매 중 리스트 */}
           <div className="mb-6">
-            <h3 className="mb-3 text-sm font-medium text-muted-foreground">판매 중</h3>
+            <h3 className="text-muted-foreground mb-3 text-sm font-medium">
+              판매 중
+            </h3>
             <div className="space-y-3">
               {sellingOngoingProducts.length === 0 && (
                 <div className="py-8 text-center">
-                  <p className="text-muted-foreground mb-4">현재 판매 중인 상품이 없습니다.</p>
-                  <Button asChild variant="outline" className="rounded-lg bg-transparent">
+                  <p className="text-muted-foreground mb-4">
+                    현재 판매 중인 상품이 없습니다.
+                  </p>
+                  <Button
+                    asChild
+                    variant="outline"
+                    className="rounded-lg bg-transparent"
+                  >
                     <Link href="/products/create">상품 등록하러 가기</Link>
                   </Button>
                 </div>
               )}
               {sellingOngoingProducts.map((product) => (
-                <div key={product.id} className="hover:bg-muted cursor-pointer p-4 transition-colors border-b last:border-b-0">
-                  <Link href={`/products/${product.id}`} className="flex items-center justify-between">
+                <div
+                  key={product.id}
+                  className="hover:bg-muted cursor-pointer border-b p-4 transition-colors last:border-b-0"
+                >
+                  <Link
+                    href={`/products/${product.id}`}
+                    className="flex items-center justify-between"
+                  >
                     <div className="flex-1">
-                      <p className="text-foreground font-medium">{product.name}</p>
+                      <p className="text-foreground font-medium">
+                        {product.name}
+                      </p>
                       <div className="mt-2 flex items-center gap-2">
-                        <p className="text-muted-foreground text-xs">상태: {getProductStatusLabel(product.productStatus)}</p>
+                        <p className="text-muted-foreground text-xs">
+                          상태: {getProductStatusLabel(product.productStatus)}
+                        </p>
                       </div>
                     </div>
                     <div className="text-right">
                       <p className="text-foreground text-lg font-bold">
-                        ₩{(product.bidPrice ?? product.startPrice).toLocaleString()}
+                        ₩
+                        {(
+                          product.bidPrice ?? product.startPrice
+                        ).toLocaleString()}
                       </p>
-                      <p className="text-muted-foreground text-xs">전체 입찰 횟수: {product.bidCount}</p>
+                      <p className="text-muted-foreground text-xs">
+                        전체 입찰 횟수: {product.bidCount}
+                      </p>
                     </div>
                   </Link>
                 </div>
@@ -406,28 +455,43 @@ export default function MyPage() {
 
           {/* 판매 완료 리스트 */}
           <div>
-            <h3 className="mb-3 text-sm font-medium text-muted-foreground">판매 완료</h3>
+            <h3 className="text-muted-foreground mb-3 text-sm font-medium">
+              판매 완료
+            </h3>
             <div className="space-y-3">
               {soldOutProducts.length === 0 && (
                 <div className="py-8 text-center">
-                  <p className="text-muted-foreground mb-4">판매 완료된 상품이 없습니다.</p>
+                  <p className="text-muted-foreground mb-4">
+                    판매 완료된 상품이 없습니다.
+                  </p>
                 </div>
               )}
               {soldOutProducts.map((product) => (
                 <Link key={product.id} href={`/products/${product.id}`}>
                   <div className="border-border hover:bg-muted flex cursor-pointer items-center justify-between rounded-lg border p-4 transition-colors">
                     <div className="flex-1">
-                      <p className="text-foreground font-medium">{product.name}</p>
+                      <p className="text-foreground font-medium">
+                        {product.name}
+                      </p>
                       <div className="mt-2 flex items-center gap-2">
-                        <Badge variant="secondary" className="text-xs">판매 완료</Badge>
-                        <p className="text-muted-foreground text-xs">상태: {getProductStatusLabel(product.productStatus)}</p>
+                        <Badge variant="secondary" className="text-xs">
+                          판매 완료
+                        </Badge>
+                        <p className="text-muted-foreground text-xs">
+                          상태: {getProductStatusLabel(product.productStatus)}
+                        </p>
                       </div>
                     </div>
                     <div className="text-right">
                       <p className="text-foreground text-lg font-bold">
-                        ₩{(product.bidPrice ?? product.startPrice).toLocaleString()}
+                        ₩
+                        {(
+                          product.bidPrice ?? product.startPrice
+                        ).toLocaleString()}
                       </p>
-                      <p className="text-muted-foreground mt-1 text-xs font-medium">종료</p>
+                      <p className="text-muted-foreground mt-1 text-xs font-medium">
+                        종료
+                      </p>
                     </div>
                   </div>
                 </Link>

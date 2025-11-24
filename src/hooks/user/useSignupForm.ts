@@ -1,10 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
-
-// API 기본 URL
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+import { apiPost } from "@/lib/api";
 
 export function useSignupForm() {
   const router = useRouter();
@@ -65,28 +62,21 @@ export function useSignupForm() {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { confirmPassword, ...signupData } = formData;
 
-      await axios.post(`${API_BASE_URL}/api/auth/sign-up`, signupData);
+      await apiPost("/api/auth/sign-up", signupData);
 
       alert("회원가입에 성공했습니다. 로그인 페이지로 이동합니다.");
       router.push("/login");
     } catch (error) {
-      if (axios.isAxiosError(error) && error.response) {
-        // 409 Conflict (중복 에러)
-        if (error.response.status === 409) {
-          setErrors({
-            form:
-              error.response.data.message ||
-              "이미 사용 중인 이메일 또는 닉네임입니다.",
-          });
-        } else {
-          setErrors({
-            form:
-              error.response.data.message ||
-              "회원가입에 실패했습니다. 다시 시도해주세요.",
-          });
-        }
+      const err = error as Error;
+      // 409 Conflict (중복 에러)
+      if (err.message.includes("409")) {
+        setErrors({
+          form: "이미 사용 중인 이메일 또는 닉네임입니다.",
+        });
       } else {
-        setErrors({ form: "알 수 없는 오류가 발생했습니다." });
+        setErrors({
+          form: err.message || "회원가입에 실패했습니다. 다시 시도해주세요.",
+        });
       }
     } finally {
       setIsLoading(false);

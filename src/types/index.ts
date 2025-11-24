@@ -40,8 +40,12 @@ export interface SignInRequest {
 
 export interface SignInResponse {
   accessToken: string;
-  refreshToken?: string;
-  user: User;
+  // refreshToken은 HttpOnly 쿠키로 전달되므로 응답 바디에 포함하지 않음
+}
+
+// 토큰 재발급 응답
+export interface ReissueResponse {
+  accessToken: string;
 }
 
 // GET 상품 상세
