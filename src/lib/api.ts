@@ -48,9 +48,6 @@ async function refreshAccessToken(): Promise<string | null> {
     const response = await fetch(`${API_BASE_URL}/api/auth/reissue`, {
       method: "POST",
       credentials: "include", // Refresh Token 쿠키 자동 전송
-      headers: {
-        "Content-Type": "application/json",
-      },
     });
 
     if (!response.ok) {

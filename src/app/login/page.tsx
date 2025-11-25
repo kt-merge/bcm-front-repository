@@ -100,6 +100,7 @@ export default function Login() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="your@example.com"
+              autoComplete="email"
               className="bg-background border-border text-foreground placeholder-muted-foreground focus:ring-primary w-full rounded-lg border px-4 py-3 transition-all focus:ring-2 focus:outline-none"
               required
               disabled={isLoading}
@@ -116,6 +117,7 @@ export default function Login() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
+              autoComplete="current-password"
               className="bg-background border-border text-foreground placeholder-muted-foreground focus:ring-primary w-full rounded-lg border px-4 py-3 transition-all focus:ring-2 focus:outline-none"
               required
               disabled={isLoading}

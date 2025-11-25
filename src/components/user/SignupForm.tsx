@@ -23,6 +23,7 @@ export function SignupForm() {
         name="email"
         type="email"
         placeholder="your@example.com"
+        autoComplete="email"
         value={formData.email}
         onChange={handleChange}
         error={errors.email}
@@ -32,6 +33,7 @@ export function SignupForm() {
         name="password"
         type="password"
         placeholder="••••••••"
+        autoComplete="new-password"
         value={formData.password}
         onChange={handleChange}
         error={errors.password}
@@ -41,6 +43,7 @@ export function SignupForm() {
         name="confirmPassword"
         type="password"
         placeholder="••••••••"
+        autoComplete="new-password"
         value={formData.confirmPassword}
         onChange={handleChange}
         error={errors.confirmPassword}

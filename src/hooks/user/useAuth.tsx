@@ -10,7 +10,11 @@ import {
 } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { User, AuthContextType } from "@/types";
-import { setAccessToken as setGlobalAccessToken, apiPost } from "@/lib/api";
+import {
+  setAccessToken as setGlobalAccessToken,
+  apiPost,
+  apiGet,
+} from "@/lib/api";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -80,7 +84,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // Refresh Token은 HttpOnly Cookie로 자동 갱신됨
 
           // 사용자 정보 가져오기
-          const userResponse = await apiPost<User>("/api/users/me");
+          const userResponse = await apiGet<User>("/api/users/me");
           setUser(userResponse);
         }
       } catch {
