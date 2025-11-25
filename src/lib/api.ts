@@ -8,12 +8,9 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
 let isRefreshing = false;
-let refreshSubscribers: Array<(token: string) => void> = [];
+let refreshSubscribers: Array<(token: string | null) => void> = [];
 const ACCESS_TOKEN_KEY = "accessToken";
 
-/**
- * Access Token 설정
- */
 export function setAccessToken(token: string | null) {
   if (typeof window !== "undefined") {
     if (token) {
@@ -24,37 +21,27 @@ export function setAccessToken(token: string | null) {
   }
 }
 
-/**
- * Access Token 가져오기
- */
 export function getAccessToken(): string | null {
   if (typeof window === "undefined") return null;
   return localStorage.getItem(ACCESS_TOKEN_KEY);
 }
 
-/**
- * 토큰 재발급 대기 중인 요청들을 구독
- */
-function subscribeTokenRefresh(callback: (token: string) => void) {
+// 구독 추가
+function subscribeTokenRefresh(callback: (token: string | null) => void) {
   refreshSubscribers.push(callback);
 }
 
-/**
- * 토큰 재발급 완료 시 대기 중인 요청들에게 새 토큰 전달
- */
-function onTokenRefreshed(token: string) {
+// 성공 시 토큰 전달, 실패 시 null 전달하여 대기열 해소
+function onTokenRefreshed(token: string | null) {
   refreshSubscribers.forEach((callback) => callback(token));
   refreshSubscribers = [];
 }
 
-/**
- * Access Token 재발급
- */
 async function refreshAccessToken(): Promise<string | null> {
   try {
     const response = await fetch(`${API_BASE_URL}/api/auth/reissue`, {
       method: "POST",
-      credentials: "include", // Refresh Token 쿠키 자동 전송
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },
@@ -76,14 +63,10 @@ async function refreshAccessToken(): Promise<string | null> {
   } catch (error) {
     console.error("토큰 재발급 실패:", error);
     setAccessToken(null);
-
     return null;
   }
 }
 
-/**
- * API Fetch Wrapper
- */
 export async function apiFetch<T = unknown>(
   endpoint: string,
   options: RequestInit = {},
@@ -92,10 +75,9 @@ export async function apiFetch<T = unknown>(
     ? endpoint
     : `${API_BASE_URL}${endpoint}`;
 
-  // 기본 옵션 설정
   const config: RequestInit = {
     ...options,
-    credentials: "include", // 쿠키 자동 포함
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
       ...options.headers,
@@ -103,7 +85,6 @@ export async function apiFetch<T = unknown>(
   };
 
   const currentAccessToken = getAccessToken();
-  // Access Token이 있으면 Authorization 헤더에 추가
   if (currentAccessToken) {
     config.headers = {
       ...config.headers,
@@ -114,24 +95,28 @@ export async function apiFetch<T = unknown>(
   try {
     const response = await fetch(url, config);
 
-    // 401 에러 발생 시 토큰 재발급 시도
     if (response.status === 401) {
-      // 이미 토큰 재발급 중이라면 대기
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
-          subscribeTokenRefresh(async (newToken: string) => {
+          // [수정] newToken이 null일 수 있음을 처리
+          subscribeTokenRefresh(async (newToken) => {
+            if (!newToken) {
+              // 재발급 실패 시 대기하던 요청도 에러 처리
+              reject(new Error("토큰 재발급 실패로 인한 요청 취소"));
+              return;
+            }
             try {
-              // 새 토큰으로 원래 요청 재시도
               config.headers = {
                 ...config.headers,
                 Authorization: `Bearer ${newToken}`,
               };
               const retryResponse = await fetch(url, config);
-
               if (!retryResponse.ok) {
-                throw new Error(`API 요청 실패: ${retryResponse.status}`);
+                const errorData = await retryResponse.json().catch(() => ({}));
+                throw new Error(
+                  errorData.message || `API 요청 실패: ${retryResponse.status}`,
+                );
               }
-
               const data = await retryResponse.json();
               resolve(data);
             } catch (error) {
@@ -141,20 +126,20 @@ export async function apiFetch<T = unknown>(
         });
       }
 
-      // 토큰 재발급 시작
       isRefreshing = true;
 
       try {
         const newToken = await refreshAccessToken();
 
+        // 성공이든 실패든 대기 중인 요청들에게 결과를 알려줌
+        onTokenRefreshed(newToken);
+
         if (!newToken) {
+          // 재발급 실패 시 로그아웃 이벤트 발생 (선택 사항)
+          // window.dispatchEvent(new Event("auth:logout"));
           throw new Error("토큰 재발급 실패");
         }
 
-        // 대기 중인 요청들에게 새 토큰 전달
-        onTokenRefreshed(newToken);
-
-        // 원래 요청 재시도
         config.headers = {
           ...config.headers,
           Authorization: `Bearer ${newToken}`,
@@ -163,22 +148,27 @@ export async function apiFetch<T = unknown>(
         const retryResponse = await fetch(url, config);
 
         if (!retryResponse.ok) {
-          throw new Error(`API 요청 실패: ${retryResponse.status}`);
+          const errorData = await retryResponse.json().catch(() => ({}));
+          throw new Error(
+            errorData.message || `API 요청 실패: ${retryResponse.status}`,
+          );
         }
 
         return await retryResponse.json();
+      } catch (error) {
+        // 재발급 과정 자체에서 에러 발생 시 처리
+        onTokenRefreshed(null); // 대기열에게 실패 알림
+        throw error;
       } finally {
         isRefreshing = false;
       }
     }
 
-    // 정상 응답 처리
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       throw new Error(errorData.message || `API 요청 실패: ${response.status}`);
     }
 
-    // 응답이 204 No Content인 경우
     if (response.status === 204) {
       return {} as T;
     }
@@ -190,24 +180,15 @@ export async function apiFetch<T = unknown>(
   }
 }
 
-/**
- * GET 요청
- */
-export function apiGet<T = unknown>(
-  endpoint: string,
-  options?: RequestInit,
-): Promise<T> {
+export function apiGet<T = unknown>(endpoint: string, options?: RequestInit) {
   return apiFetch<T>(endpoint, { ...options, method: "GET" });
 }
 
-/**
- * POST 요청
- */
 export function apiPost<T = unknown>(
   endpoint: string,
   data?: unknown,
   options?: RequestInit,
-): Promise<T> {
+) {
   return apiFetch<T>(endpoint, {
     ...options,
     method: "POST",
@@ -215,14 +196,11 @@ export function apiPost<T = unknown>(
   });
 }
 
-/**
- * PUT 요청
- */
 export function apiPut<T = unknown>(
   endpoint: string,
   data?: unknown,
   options?: RequestInit,
-): Promise<T> {
+) {
   return apiFetch<T>(endpoint, {
     ...options,
     method: "PUT",
@@ -230,14 +208,11 @@ export function apiPut<T = unknown>(
   });
 }
 
-/**
- * PATCH 요청
- */
 export function apiPatch<T = unknown>(
   endpoint: string,
   data?: unknown,
   options?: RequestInit,
-): Promise<T> {
+) {
   return apiFetch<T>(endpoint, {
     ...options,
     method: "PATCH",
@@ -245,12 +220,9 @@ export function apiPatch<T = unknown>(
   });
 }
 
-/**
- * DELETE 요청
- */
 export function apiDelete<T = unknown>(
   endpoint: string,
   options?: RequestInit,
-): Promise<T> {
+) {
   return apiFetch<T>(endpoint, { ...options, method: "DELETE" });
 }

@@ -31,8 +31,6 @@ export function useLoginForm() {
 
     try {
       // --- 1단계: 로그인 API 호출 ---
-      // Refresh Token은 HttpOnly 쿠키로 자동 설정됨
-      // credentials: "include"는 apiPost 내부에서 자동 적용됨
       const loginResponse = await apiPost<SignInResponse>("/api/auth/sign-in", {
         email,
         password,
@@ -42,20 +40,23 @@ export function useLoginForm() {
       if (!accessToken) {
         throw new Error("로그인 응답에 accessToken이 없습니다.");
       }
-      // Refresh Token은 HttpOnly Cookie로 백엔드에서 자동 설정됨
 
-      // --- 2단계: Access Token을 전역으로 설정 ---
-      // 이렇게 해야 다음 API 호출에서 Authorization 헤더가 포함됨
+      // --- [변경] 2단계: Access Token 설정 및 저장 ---
+
+      // 1. API 유틸리티에 토큰 설정 (즉시 사용을 위해 메모리에 세팅)
       setAccessToken(accessToken);
 
+      // 2. 로컬 스토리지에 토큰 영구 저장 (새로고침 시 유지를 위해 추가됨)
+      localStorage.setItem("accessToken", accessToken);
+
       // --- 3단계: 유저 정보 API 호출 (Access Token 사용) ---
-      // 이제 apiGet이 Authorization 헤더에 Access Token을 포함시킴
+      // 위에서 setAccessToken을 했기 때문에 헤더에 토큰이 포함되어 전송됩니다.
       const userData = await apiGet<User>("/api/users/me");
 
-      // --- 4단계: useAuth에 토큰과 유저 정보 저장 (메모리 상태) ---
+      // --- 4단계: useAuth에 토큰과 유저 정보 저장 (Context 상태 업데이트) ---
       login(accessToken, userData);
 
-      router.push("/"); // 메인 페이지로 이동
+      router.push("/");
     } catch (err) {
       const error = err as Error;
       if (error.message.includes("401") || error.message.includes("404")) {
