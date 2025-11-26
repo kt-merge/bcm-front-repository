@@ -22,6 +22,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Edit2 } from "lucide-react";
 
 // --- 초기 데이터 및 타입 ---
@@ -124,6 +125,7 @@ export default function MyPage() {
   const router = useRouter();
 
   // --- State ---
+  const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<UserProfile>(INITIAL_USER);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -141,45 +143,48 @@ export default function MyPage() {
   );
 
   // --- 1. 데이터 불러오기 ---
-  useEffect(() => {
-    const fetchUserInfo = async () => {
-      try {
-        const token = localStorage.getItem("accessToken");
-        if (!token) return; // 토큰이 없으면 중단 (추가 안전장치)
+    useEffect(() => {
+      const fetchUserInfo = async () => {
+        try {
+          const token = localStorage.getItem("accessToken");
+          if (!token) return; // 토큰이 없으면 그냥 리턴 (finally로 가서 로딩 끝남)
 
-        const apiUser = await apiGet<ApiUserResponse>("/api/users/me");
+          const apiUser = await apiGet<ApiUserResponse>("/api/users/me");
 
-        // 리스트 데이터 세팅
-        setSellingProducts(apiUser.products ?? []);
-        setPurchasedProducts(apiUser.winners ?? []);
-        setPurchaseOngoingProducts(apiUser.productBids ?? []);
+          // 리스트 데이터 세팅
+          setSellingProducts(apiUser.products ?? []);
+          setPurchasedProducts(apiUser.winners ?? []);
+          setPurchaseOngoingProducts(apiUser.productBids ?? []);
 
-        // 프로필 데이터 가공
-        const fetchedUser: UserProfile = {
-          nickname: apiUser.nickname ?? INITIAL_USER.nickname,
-          joinDate: apiUser.createdAt
-            ? formatJoinDate(apiUser.createdAt)
-            : INITIAL_USER.joinDate,
-          rating: apiUser.rating ?? INITIAL_USER.rating,
-          reviews: apiUser.reviews ?? INITIAL_USER.reviews,
-          phoneNumber: apiUser.phoneNumber
-            ? String(apiUser.phoneNumber).trim()
-            : INITIAL_USER.phoneNumber,
-        };
+          // 프로필 데이터 가공
+          const fetchedUser: UserProfile = {
+            nickname: apiUser.nickname ?? INITIAL_USER.nickname,
+            joinDate: apiUser.createdAt
+              ? formatJoinDate(apiUser.createdAt)
+              : INITIAL_USER.joinDate,
+            rating: apiUser.rating ?? INITIAL_USER.rating,
+            reviews: apiUser.reviews ?? INITIAL_USER.reviews,
+            phoneNumber: apiUser.phoneNumber
+              ? String(apiUser.phoneNumber).trim()
+              : INITIAL_USER.phoneNumber,
+          };
 
-        setUser(fetchedUser);
-        setNicknameInput(fetchedUser.nickname);
-        setPhoneNumberInput(fetchedUser.phoneNumber);
-      } catch {
-        // 에러 시 초기화
-        setUser(INITIAL_USER);
-        setNicknameInput(INITIAL_USER.nickname);
-        setPhoneNumberInput(INITIAL_USER.phoneNumber);
-      }
-    };
+          setUser(fetchedUser);
+          setNicknameInput(fetchedUser.nickname);
+          setPhoneNumberInput(fetchedUser.phoneNumber);
+        } catch {
+          // 에러 시 초기화 (목데이터 "익명 사용자" 등 유지)
+          setUser(INITIAL_USER);
+          setNicknameInput(INITIAL_USER.nickname);
+          setPhoneNumberInput(INITIAL_USER.phoneNumber);
+        } finally {
+          // [중요] 성공하든 실패하든 로딩 상태 해제
+          setIsLoading(false);
+        }
+      };
 
-    fetchUserInfo();
-  }, [router]);
+      fetchUserInfo();
+    }, [router]);
 
   // --- 2. 프로필 수정 핸들러 ---
   const handleSave = async () => {
@@ -228,12 +233,23 @@ export default function MyPage() {
         <div className="bg-card border-border mb-8 rounded-lg border p-6 md:p-8">
           <div className="flex items-center justify-between gap-4">
             <div className="flex-1">
-              <h1 className="text-foreground text-2xl font-bold md:text-3xl">
-                {user.nickname}
-              </h1>
-              <p className="text-muted-foreground mt-2 text-sm">
-                {user.joinDate}
-              </p>
+              {isLoading ? (
+                // 로딩 중일 때: 회색 박스(스켈레톤) 깜빡임
+                <div className="space-y-2">
+                  <Skeleton className="h-8 w-48" />
+                  <Skeleton className="h-4 w-32" />
+                </div>
+              ) : (
+                // 로딩 끝남: 실제 닉네임과 가입일 표시
+                <>
+                  <h1 className="text-foreground text-2xl font-bold md:text-3xl">
+                    {user.nickname}
+                  </h1>
+                  <p className="text-muted-foreground mt-2 text-sm">
+                    {user.joinDate}
+                  </p>
+                </>
+              )}
             </div>
 
             <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
