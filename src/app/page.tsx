@@ -85,8 +85,18 @@ function HomeContent() {
       });
     }
 
-    // 2. 정렬
+    // 2. 정렬 (경매 종료 여부 우선, 그 다음 선택된 정렬 기준)
     const sorted = [...filtered].sort((a, b) => {
+      // 경매 종료 여부를 우선으로 판단
+      const aExpired = new Date(a.bidEndDate).getTime() < new Date().getTime();
+      const bExpired = new Date(b.bidEndDate).getTime() < new Date().getTime();
+
+      // a가 진행 중이고 b가 종료되었으면 a가 앞
+      if (!aExpired && bExpired) return -1;
+      // a가 종료되었고 b가 진행 중이면 b가 앞
+      if (aExpired && !bExpired) return 1;
+
+      // 같은 상태(둘 다 진행 중이거나 둘 다 종료)라면 선택된 정렬 기준 적용
       switch (sortBy) {
         case "latest":
           return (
@@ -189,7 +199,11 @@ function HomeContent() {
             <>
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {sortedProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} />
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    currentPage={currentPage}
+                  />
                 ))}
               </div>
 

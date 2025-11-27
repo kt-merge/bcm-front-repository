@@ -68,15 +68,11 @@ export function useSignupForm() {
       router.push("/login");
     } catch (error) {
       const err = error as Error;
-      // 409 Conflict (중복 에러)
-      if (err.message.includes("409")) {
-        setErrors({
-          form: "이미 사용 중인 이메일 또는 닉네임입니다.",
-        });
+      // 403 Forbidden (중복 이메일 또는 기타 제한)
+      if (err.message.includes("403")) {
+        alert("이미 가입된 이메일입니다.");
       } else {
-        setErrors({
-          form: err.message || "회원가입에 실패했습니다. 다시 시도해주세요.",
-        });
+        alert(err.message || "회원가입에 실패했습니다. 다시 시도해주세요.");
       }
     } finally {
       setIsLoading(false);

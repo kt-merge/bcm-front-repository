@@ -4,6 +4,7 @@ import type React from "react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import AddressSearch from "@/components/payment/AddressSearch";
 import { Check, AlertCircle } from "lucide-react";
 import mockData from "@/mocks/products.json";
 import { formatCurrency } from "@/lib/utils";
@@ -69,10 +70,24 @@ export default function CheckoutPage({
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [orderComplete, setOrderComplete] = useState<boolean>(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isOpen, setIsOpen] = useState(false);
 
   const shippingFee = 3000;
   const tax = Math.floor((winningProduct.winningBid * 0.1) / 100) * 100;
   const totalAmount = winningProduct.winningBid + shippingFee + tax;
+
+  // 주소 찾기 완료 시 실행될 함수
+  const handleAddressComplete = (data: {
+    zonecode: string;
+    address: string;
+  }) => {
+    setDeliveryInfo((prev) => ({
+      ...prev,
+      postalCode: data.zonecode,
+      address: data.address,
+    }));
+    setIsOpen(false); // 모달 닫기
+  };
 
   const handleDeliveryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -166,6 +181,12 @@ export default function CheckoutPage({
 
   return (
     <main className="bg-background min-h-screen py-8 md:py-12">
+      {isOpen && (
+        <AddressSearch
+          onComplete={handleAddressComplete}
+          onClose={() => setIsOpen(false)}
+        />
+      )}
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <Link
           href="/product/1"
@@ -239,6 +260,7 @@ export default function CheckoutPage({
                   <Button
                     variant="outline"
                     className="rounded-lg bg-transparent"
+                    onClick={() => setIsOpen(true)}
                   >
                     찾기
                   </Button>

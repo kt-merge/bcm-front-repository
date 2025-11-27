@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Product } from "@/types";
@@ -34,6 +35,8 @@ export default function ProductDetail({
 }: {
   params: Promise<{ id: string }> | { id: string };
 }) {
+  const searchParams = useSearchParams();
+  const page = searchParams.get("page") || "0";
   const clientRef = useRef<Client | null>(null);
   const { user } = useAuth();
   const [product, setProduct] = useState<Product | null>(null);
@@ -276,7 +279,7 @@ export default function ProductDetail({
       <main className="bg-background min-h-screen py-8 md:py-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <Link
-            href="/"
+            href={`/?page=${page}`}
             className="text-muted-foreground hover:text-foreground mb-8 inline-flex items-center gap-2 text-sm transition-colors"
           >
             ← 홈으로 돌아가기
@@ -297,7 +300,7 @@ export default function ProductDetail({
     <main className="bg-background min-h-screen py-8 md:py-12">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <Link
-          href="/"
+          href={`/?page=${page}`}
           className="text-muted-foreground hover:text-foreground mb-8 inline-flex items-center gap-2 text-sm transition-colors"
         >
           ← 홈으로 돌아가기

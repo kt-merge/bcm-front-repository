@@ -5,7 +5,13 @@ import { Product } from "@/types";
 import { AlarmClock } from "lucide-react";
 import { formatCurrency, isAuctionExpired, getTimeRemainMs } from "@/lib/utils";
 
-export default function ProductCard({ product }: { product: Product }) {
+export default function ProductCard({
+  product,
+  currentPage = 0,
+}: {
+  product: Product;
+  currentPage?: number;
+}) {
   // 남은 일수 계산
   const calculateDaysLeft = () => {
     const diffTime = getTimeRemainMs(product.bidEndDate);
@@ -27,7 +33,7 @@ export default function ProductCard({ product }: { product: Product }) {
   const isExpired = () => isAuctionExpired(product.bidEndDate);
 
   return (
-    <Link href={`/products/${product.id}`}>
+    <Link href={`/products/${product.id}?page=${currentPage}`}>
       <div className="group flex h-full cursor-pointer flex-col">
         {/* Image Container */}
         <div className="bg-muted border-border relative mb-4 flex aspect-square items-center justify-center overflow-hidden rounded-lg border">
