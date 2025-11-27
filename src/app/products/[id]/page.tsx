@@ -478,7 +478,7 @@ export default function ProductDetail({
                           new Date(b.bidTime).getTime() -
                           new Date(a.bidTime).getTime(),
                       )
-                      .slice(0, showAllBids ? product.productBids.length : 1)
+                      .slice(0, showAllBids ? 5 : 1)
                       .map((bid, index) => (
                         <motion.div
                           key={bid.productBidId}
@@ -518,7 +518,7 @@ export default function ProductDetail({
                   >
                     {showAllBids
                       ? "접기"
-                      : `더보기 (${product.productBids.length - 1}개)`}
+                      : `더보기 (${Math.min(product.productBids.length - 1, 4)}개)`}
                   </Button>
                 )}
               </div>
