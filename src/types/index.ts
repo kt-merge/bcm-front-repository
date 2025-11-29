@@ -143,3 +143,12 @@ export type ProductFormData = {
   productStatus: "GOOD" | "BAD" | "NEW" | string;
   imageUrl?: string;
 };
+
+export type Order = {
+  orderId: number;
+  productName: string;
+  bidPrice: number;
+  orderStatus: OrderStatus;
+}
+
+export type OrderStatus = "PAYMENT_PENDING" | "PAID";

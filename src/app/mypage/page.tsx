@@ -1,6 +1,6 @@
 "use client";
 
-import type { MypageProductBid, Product, WinnerDetails } from "@/types";
+import type { MypageProductBid, Order, Product, WinnerDetails } from "@/types";
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -52,6 +52,7 @@ type ApiUserResponse = {
   products?: Product[];
   winners?: WinnerDetails[];
   productBids?: MypageProductBid[];
+  orders: Order[];
 };
 
 // --- 유틸리티 함수 ---
@@ -147,6 +148,7 @@ export default function MyPage() {
   const [purchaseBidding, setPurchaseBidding] = useState<MypageProductBid[]>([]);
   const [purchasePending, setPurchasePending] = useState<WinnerDetails[]>([]);
   const [purchaseCompleted, setPurchaseCompleted] = useState<WinnerDetails[]>([]); 
+  const [orders, setOrders] = useState<Order[]>([]);
 
 
     // --- 1. 데이터 불러오기 ---
@@ -173,7 +175,10 @@ export default function MyPage() {
           
           // [구매 완료] 현재 백엔드 데이터로 구분 불가하므로 빈 배열
           setPurchaseCompleted([]); 
+          // [주문 내역] 서버 데이터 사용
+          setOrders(apiUser.orders);
 
+          
           // 프로필 데이터 가공
           const fetchedUser: UserProfile = {
             nickname: apiUser.nickname ?? INITIAL_USER.nickname,
@@ -255,12 +260,11 @@ export default function MyPage() {
 
 
   // --- 4. 결제하기 버튼 핸들러 ---
-  const handlePayment = (productId: number | string, productName: string, price: number) => {
+  const handlePayment = (orderId: number | string, productName: string) => {
     // 결제 페이지로 이동 (동적 라우팅 적용)
     if (!confirm(`'${productName}' 상품의 결제 페이지로 이동하시겠습니까?`)) return;
 
-    // 예: /payment/1462 (productId를 orderId 자리에 넣어 보냄)
-    router.push(`/payment/${productId}`);
+    router.push(`/payment/${orderId}`);
   };
   
   // [NEW UTILITY] 0이면 연하게, 1 이상이면 강조하는 클래스 반환
@@ -435,17 +439,19 @@ export default function MyPage() {
                 <div className={`rounded-lg border ${
                     purchasePending.length > 0 ? "border-primary/20 bg-primary/5" : "border-border bg-card"
                 }`}>
-                    {purchasePending.map((product) => (
+                    {orders
+                    .filter(order => order.orderStatus === "PAYMENT_PENDING")
+                    .map((order) => (
                         <ProductListItem
-                            key={product.productId}
-                            id={product.productId}
-                            name={product.productName}
-                            price={product.bidPrice}
+                            key={order.orderId}
+                            id={order.orderId}
+                            name={order.productName}
+                            price={order.bidPrice}
                             subText="낙찰 성공! 결제가 필요합니다"
                             actionNode={
                                 <Button 
                                     size="sm" 
-                                    onClick={() => handlePayment(product.productId, product.productName, product.bidPrice)}
+                                    onClick={() => handlePayment(order.orderId, order.productName)}
                                 >
                                     결제하기
                                 </Button>
@@ -462,18 +468,20 @@ export default function MyPage() {
               구매 완료
             </h3>
             <div className="border-border bg-card rounded-lg border">
-              {purchaseCompleted.length === 0 ? (
+              {orders.filter(order => order.orderStatus === "PAID").length === 0 ? (
                 <div className="py-8 text-center">
                   <p className="text-muted-foreground text-sm">구매 완료된 상품이 없습니다.</p>
                 </div>
               ) : (
-                purchaseCompleted.map((product) => (
+                orders
+                .filter(order => order.orderStatus === "PAID")
+                .map((order) => (
                   <ProductListItem
-                    key={product.productId}
-                    id={product.productId}
-                    name={product.productName}
-                    price={product.bidPrice}
-                    status={product.productStatus}
+                    key={order.orderId}
+                    id={order.orderId}
+                    name={order.productName}
+                    price={order.bidPrice}
+                    status={order.orderStatus}
                     badgeText="구매 완료"
                     subText="배송 준비중"
                   />
