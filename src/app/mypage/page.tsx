@@ -428,7 +428,13 @@ export default function MyPage() {
 
           {/* 3. 결제 대기 목록 */}
           <div className="mb-8">
-            <h3 className="text-primary mb-3 text-sm font-bold flex items-center gap-2">
+            <h3
+              className={`text-muted-foreground mb-3 text-sm font-medium ${
+                orders.filter(order => order.orderStatus === "PAYMENT_PENDING").length > 0
+                  ? "text-primary"
+                  : "text-muted-foreground"
+              }`}
+            >
               결제 대기
             </h3>
             <div
@@ -549,7 +555,7 @@ export default function MyPage() {
             <div className="border-border bg-card rounded-lg border">
               {sellingBidding.length === 0 ? (
                 <div className="py-8 text-center">
-                  <p className="text-muted-foreground mb-4">
+                  <p className="text-muted-foreground text-sm">
                     현재 입찰 중인 상품이 없습니다.
                   </p>
                 </div>
@@ -570,7 +576,7 @@ export default function MyPage() {
 
           {/* 3. 판매 대기 목록 (강조 스타일 적용) */}
           <div className="mb-6">
-            <h3 className={`mb-3 text-sm font-medium flex items-center gap-2 ${
+            <h3 className={`text-muted-foreground mb-3 text-sm font-medium ${
                 sellingPending.length > 0 ? "text-primary font-bold" : "text-muted-foreground"
             }`}>
               입금 대기
@@ -582,7 +588,7 @@ export default function MyPage() {
             }`}> 
               {sellingPending.length === 0 ? (
                 <div className="py-8 text-center">
-                  <p className="text-muted-foreground">
+                  <p className="text-muted-foreground text-sm">
                     결제 확인을 기다리는 상품이 없습니다.
                   </p>
                 </div>
@@ -609,7 +615,7 @@ export default function MyPage() {
             <div className="border-border bg-card rounded-lg border">
               {sellingCompleted.length === 0 ? (
                 <div className="py-8 text-center">
-                  <p className="text-muted-foreground">
+                  <p className="text-muted-foreground text-sm">
                     판매 완료된 상품이 없습니다.
                   </p>
                 </div>
