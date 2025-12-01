@@ -158,12 +158,31 @@ export type Order = {
   orderId: number;
   productName: string;
   bidPrice: number;
-  orderStatus: OrderStatus2;
+  orderStatus: OrderStatus;
 };
 
 export type OrderStatus = "PAYMENT_PENDING" | "PAID";
 
-enum OrderStatus2 {
-  PAYMENT_PENDING = 'PAYMENT_PENDING',
-  PAID = 'PAID',
+export interface ShippingInfo {
+  name: string;
+  phoneNumber: string;
+  zipCode: string;
+  address: string;
+  detailAddress: string;
+}
+
+export interface UpdateShippingInfoRequest {
+  name: string;
+  phoneNumber: string;
+  zipCode: string;
+  address: string;
+  detailAddress: string;
+}
+
+export interface OrderDetail {
+  orderId: number;
+  productName: string;
+  bidPrice: number;
+  orderStatus: OrderStatus;
+  shippingInfo: ShippingInfo;
 }
