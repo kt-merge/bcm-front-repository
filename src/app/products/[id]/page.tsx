@@ -297,16 +297,16 @@ export default function ProductDetail({
   const minBidValue = product.bidPrice + minBidIncrement;
 
   return (
-    <main className="bg-background min-h-screen py-8 md:py-12">
+    <main className="bg-background min-h-screen py-6 sm:py-8 md:py-12">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <Link
           href={`/?page=${page}`}
-          className="text-muted-foreground hover:text-foreground mb-8 inline-flex items-center gap-2 text-sm transition-colors"
+          className="text-muted-foreground hover:text-foreground mb-6 inline-flex items-center gap-2 text-sm transition-colors sm:mb-8"
         >
           ← 홈으로 돌아가기
         </Link>
 
-        <div className="grid grid-cols-1 gap-8 md:gap-12 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 sm:gap-8 md:gap-10 lg:grid-cols-3 lg:gap-12">
           {/* Product Image */}
           <div className="lg:col-span-2">
             <div className="bg-muted border-border flex aspect-square items-center justify-center overflow-hidden rounded-xl border shadow-sm">
@@ -319,34 +319,36 @@ export default function ProductDetail({
           </div>
 
           {/* Bidding Panel */}
-          <div className="space-y-6">
-            <div className="border-border space-y-3 border-b pb-6">
+          <div className="space-y-4 sm:space-y-6">
+            <div className="border-border space-y-2 border-b pb-4 sm:space-y-3 sm:pb-6">
               <div className="flex items-start justify-between gap-2">
                 <div className="flex-1">
-                  <h1 className="text-foreground text-2xl font-bold text-balance md:text-3xl">
+                  <h1 className="text-foreground text-xl font-bold text-balance sm:text-2xl md:text-3xl">
                     {product.name}
                   </h1>
-                  <p className="text-muted-foreground mt-2 text-sm">
+                  <p className="text-muted-foreground mt-1.5 text-xs sm:mt-2 sm:text-sm">
                     {product.user.nickname}
                   </p>
                 </div>
               </div>
-              <Badge variant="outline" className="w-fit">
-                {getBidStatus(product.bidStatus)}
-              </Badge>
-              <Badge variant="outline" className="w-fit">
-                {getProductStatus(product.productStatus)}
-              </Badge>
+              <div className="flex flex-wrap gap-2">
+                <Badge variant="outline" className="w-fit text-xs">
+                  {getBidStatus(product.bidStatus)}
+                </Badge>
+                <Badge variant="outline" className="w-fit text-xs">
+                  {getProductStatus(product.productStatus)}
+                </Badge>
+              </div>
             </div>
 
             {/* Current Bid Section */}
-            <div className="space-y-2 overflow-hidden">
-              <p className="text-muted-foreground text-sm font-medium tracking-wide uppercase">
+            <div className="space-y-1.5 overflow-hidden sm:space-y-2">
+              <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase sm:text-sm">
                 현재 입찰가
               </p>
               <motion.p
                 key={priceKey}
-                className="text-foreground text-3xl font-bold wrap-break-word sm:text-4xl"
+                className="text-foreground text-2xl font-bold wrap-break-word sm:text-3xl md:text-4xl"
                 initial={{ scale: 1, color: "#09090b" }}
                 animate={{
                   scale: [1, 1.1, 1],
@@ -465,10 +467,12 @@ export default function ProductDetail({
             )}
 
             {/* Bid History */}
-            <div className="border-border space-y-4 border-t pt-6">
+            <div className="border-border space-y-3 border-t pt-4 sm:space-y-4 sm:pt-6">
               <div className="flex items-center gap-2">
-                <h3 className="text-foreground text-lg font-bold">입찰 기록</h3>
-                <p className="text-muted-foreground text-sm">
+                <h3 className="text-foreground text-base font-bold sm:text-lg">
+                  입찰 기록
+                </h3>
+                <p className="text-muted-foreground text-xs sm:text-sm">
                   {product.bidCount}
                 </p>
               </div>
@@ -489,7 +493,7 @@ export default function ProductDetail({
                           animate={{ opacity: 1, x: 0 }}
                           exit={{ opacity: 0, x: -20 }}
                           transition={{ duration: 0.5 }}
-                          className={`bg-muted border-border flex items-center justify-between rounded-lg border p-3 text-sm ${
+                          className={`bg-muted border-border flex items-center justify-between rounded-lg border p-2.5 text-xs sm:p-3 sm:text-sm ${
                             index === 0 ? "border-green-300 bg-green-50" : ""
                           }`}
                         >
@@ -507,7 +511,7 @@ export default function ProductDetail({
                         </motion.div>
                       ))
                   ) : (
-                    <p className="text-muted-foreground text-sm">
+                    <p className="text-muted-foreground text-xs sm:text-sm">
                       아직 입찰 기록이 없습니다.
                     </p>
                   )}
@@ -530,10 +534,12 @@ export default function ProductDetail({
         </div>
 
         {/* Description */}
-        <div className="mt-12 grid grid-cols-1 gap-8 md:gap-12">
-          <div className="space-y-4">
-            <h2 className="text-foreground text-2xl font-bold">상세 설명</h2>
-            <p className="text-foreground leading-relaxed whitespace-pre-wrap">
+        <div className="mt-8 grid grid-cols-1 gap-6 sm:mt-10 sm:gap-8 md:mt-12 md:gap-12">
+          <div className="space-y-3 sm:space-y-4">
+            <h2 className="text-foreground text-xl font-bold sm:text-2xl">
+              상세 설명
+            </h2>
+            <p className="text-foreground text-sm leading-relaxed whitespace-pre-wrap sm:text-base">
               {product.description}
             </p>
           </div>

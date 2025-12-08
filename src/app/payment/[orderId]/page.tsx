@@ -121,11 +121,13 @@ export default function CheckoutPage({
       } catch (error) {
         console.error("주문 정보 조회 실패:", error);
         // 권한 없음 또는 존재하지 않는 주문일 경우
-        if (error instanceof Error && 
-            (error.message.includes("403") || 
-             error.message.includes("404") ||
-             error.message.includes("권한") ||
-             error.message.includes("엔티티를 찾을 수 없습니다"))) {
+        if (
+          error instanceof Error &&
+          (error.message.includes("403") ||
+            error.message.includes("404") ||
+            error.message.includes("권한") ||
+            error.message.includes("엔티티를 찾을 수 없습니다"))
+        ) {
           alert("접근 권한이 없거나 존재하지 않는 주문입니다.");
           router.push("/");
           return;
@@ -309,7 +311,7 @@ export default function CheckoutPage({
   };
 
   return (
-    <main className="bg-background min-h-screen py-8 md:py-12">
+    <main className="bg-background min-h-screen py-6 sm:py-8 md:py-12">
       {isOpen && (
         <AddressSearch
           onComplete={handleAddressComplete}
@@ -319,12 +321,14 @@ export default function CheckoutPage({
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <Link
           href="/mypage"
-          className="text-muted-foreground hover:text-foreground mb-8 inline-flex items-center gap-2 text-sm transition-colors"
+          className="text-muted-foreground hover:text-foreground mb-6 inline-flex items-center gap-2 text-sm transition-colors sm:mb-8"
         >
           ← 마이페이지로 가기
         </Link>
 
-        <h1 className="text-foreground mb-12 text-4xl font-bold">주문 결제</h1>
+        <h1 className="text-foreground mb-8 text-2xl font-bold sm:mb-10 sm:text-3xl md:mb-12 md:text-4xl">
+          주문 결제
+        </h1>
 
         {isLoading ? (
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
@@ -379,192 +383,203 @@ export default function CheckoutPage({
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-          {/* Main Content */}
-          <div className="space-y-8 lg:col-span-2">
-            <div className="bg-card border-border space-y-6 rounded-lg border p-6">
-              <h2 className="text-foreground text-2xl font-bold">배송 정보</h2>
+          <div className="grid grid-cols-1 gap-6 sm:gap-8 lg:grid-cols-3">
+            {/* Main Content */}
+            <div className="space-y-6 sm:space-y-8 lg:col-span-2">
+              <div className="bg-card border-border space-y-4 rounded-lg border p-4 sm:space-y-6 sm:p-6">
+                <h2 className="text-foreground text-xl font-bold sm:text-2xl">
+                  배송 정보
+                </h2>
 
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2">
+                  <div>
+                    <label className="text-foreground mb-1.5 block text-xs font-medium sm:mb-2 sm:text-sm">
+                      이름 *
+                    </label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={deliveryInfo.name}
+                      onChange={handleDeliveryChange}
+                      placeholder="성함을 입력하세요"
+                      className={`bg-background text-foreground focus:ring-primary placeholder:text-muted-foreground w-full rounded-lg border px-3 py-2 text-sm focus:ring-2 focus:outline-none sm:px-4 ${
+                        errors.name ? "border-red-500" : "border-border"
+                      }`}
+                    />
+                    {errors.name && (
+                      <p className="mt-1 text-xs text-red-500">{errors.name}</p>
+                    )}
+                  </div>
+                  <div>
+                    <label className="text-foreground mb-1.5 block text-xs font-medium sm:mb-2 sm:text-sm">
+                      전화번호 *
+                    </label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={deliveryInfo.phone}
+                      onChange={handleDeliveryChange}
+                      placeholder="010-0000-0000"
+                      className={`bg-background text-foreground focus:ring-primary placeholder:text-muted-foreground w-full rounded-lg border px-3 py-2 text-sm focus:ring-2 focus:outline-none sm:px-4 ${
+                        errors.phone ? "border-red-500" : "border-border"
+                      }`}
+                    />
+                    {errors.phone && (
+                      <p className="mt-1 text-xs text-red-500">
+                        {errors.phone}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
                 <div>
-                  <label className="text-foreground mb-2 block text-sm font-medium">
-                    이름 *
+                  <label className="text-foreground mb-1.5 block text-xs font-medium sm:mb-2 sm:text-sm">
+                    우편번호 *
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="12345"
+                      name="postalCode"
+                      value={deliveryInfo.postalCode}
+                      onChange={handleDeliveryChange}
+                      className={`bg-background text-foreground focus:ring-primary placeholder:text-muted-foreground flex-1 rounded-lg border px-3 py-2 text-sm focus:ring-2 focus:outline-none sm:px-4 ${
+                        errors.postalCode ? "border-red-500" : "border-border"
+                      }`}
+                    />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="rounded-lg bg-transparent px-3 text-xs sm:px-4 sm:text-sm"
+                      onClick={() => setIsOpen(true)}
+                    >
+                      찾기
+                    </Button>
+                  </div>
+                  {errors.postalCode && (
+                    <p className="mt-1 text-xs text-red-500">
+                      {errors.postalCode}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="text-foreground mb-1.5 block text-xs font-medium sm:mb-2 sm:text-sm">
+                    도로명 주소 *
                   </label>
                   <input
                     type="text"
-                    name="name"
-                    value={deliveryInfo.name}
+                    name="address"
+                    value={deliveryInfo.address}
                     onChange={handleDeliveryChange}
-                    placeholder="성함을 입력하세요"
-                    className={`bg-background text-foreground focus:ring-primary placeholder:text-muted-foreground w-full rounded-lg border px-4 py-2 focus:ring-2 focus:outline-none ${
-                      errors.name ? "border-red-500" : "border-border"
+                    placeholder="도로명 주소"
+                    className={`bg-background text-foreground focus:ring-primary placeholder:text-muted-foreground mb-2 w-full rounded-lg border px-3 py-2 text-sm focus:ring-2 focus:outline-none sm:px-4 ${
+                      errors.address ? "border-red-500" : "border-border"
                     }`}
                   />
-                  {errors.name && (
-                    <p className="mt-1 text-xs text-red-500">{errors.name}</p>
+                  {errors.address && (
+                    <p className="mt-1 text-xs text-red-500">
+                      {errors.address}
+                    </p>
                   )}
-                </div>
-                <div>
-                  <label className="text-foreground mb-2 block text-sm font-medium">
-                    전화번호 *
-                  </label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={deliveryInfo.phone}
-                    onChange={handleDeliveryChange}
-                    placeholder="010-0000-0000"
-                    className={`bg-background text-foreground focus:ring-primary placeholder:text-muted-foreground w-full rounded-lg border px-4 py-2 focus:ring-2 focus:outline-none ${
-                      errors.phone ? "border-red-500" : "border-border"
-                    }`}
-                  />
-                  {errors.phone && (
-                    <p className="mt-1 text-xs text-red-500">{errors.phone}</p>
-                  )}
-                </div>
-              </div>
-
-              <div>
-                <label className="text-foreground mb-2 block text-sm font-medium">
-                  우편번호 *
-                </label>
-                <div className="flex gap-2">
                   <input
                     type="text"
-                    placeholder="12345"
-                    name="postalCode"
-                    value={deliveryInfo.postalCode}
+                    name="detailAddress"
+                    value={deliveryInfo.detailAddress}
                     onChange={handleDeliveryChange}
-                    className={`bg-background text-foreground focus:ring-primary placeholder:text-muted-foreground flex-1 rounded-lg border px-4 py-2 focus:ring-2 focus:outline-none ${
-                      errors.postalCode ? "border-red-500" : "border-border"
+                    placeholder="상세 주소 (아파트, 동/호 등)"
+                    className={`bg-background text-foreground focus:ring-primary placeholder:text-muted-foreground w-full rounded-lg border px-3 py-2 text-sm focus:ring-2 focus:outline-none sm:px-4 ${
+                      errors.detailAddress ? "border-red-500" : "border-border"
                     }`}
                   />
-                  <Button
-                    variant="outline"
-                    className="rounded-lg bg-transparent"
-                    onClick={() => setIsOpen(true)}
-                  >
-                    찾기
-                  </Button>
+                  {errors.detailAddress && (
+                    <p className="mt-1 text-xs text-red-500">
+                      {errors.detailAddress}
+                    </p>
+                  )}
                 </div>
-                {errors.postalCode && (
-                  <p className="mt-1 text-xs text-red-500">
-                    {errors.postalCode}
-                  </p>
-                )}
               </div>
 
-              <div>
-                <label className="text-foreground mb-2 block text-sm font-medium">
-                  도로명 주소 *
-                </label>
-                <input
-                  type="text"
-                  name="address"
-                  value={deliveryInfo.address}
-                  onChange={handleDeliveryChange}
-                  placeholder="도로명 주소"
-                  className={`bg-background text-foreground focus:ring-primary placeholder:text-muted-foreground mb-2 w-full rounded-lg border px-4 py-2 focus:ring-2 focus:outline-none ${
-                    errors.address ? "border-red-500" : "border-border"
-                  }`}
-                />
-                {errors.address && (
-                  <p className="mt-1 text-xs text-red-500">{errors.address}</p>
-                )}
-                <input
-                  type="text"
-                  name="detailAddress"
-                  value={deliveryInfo.detailAddress}
-                  onChange={handleDeliveryChange}
-                  placeholder="상세 주소 (아파트, 동/호 등)"
-                  className={`bg-background text-foreground focus:ring-primary placeholder:text-muted-foreground w-full rounded-lg border px-4 py-2 focus:ring-2 focus:outline-none ${
-                    errors.detailAddress ? "border-red-500" : "border-border"
-                  }`}
-                />
-                {errors.detailAddress && (
-                  <p className="mt-1 text-xs text-red-500">
-                    {errors.detailAddress}
-                  </p>
-                )}
+              <div className="bg-card border-border space-y-4 rounded-lg border p-4 sm:space-y-6 sm:p-6">
+                <h2 className="text-foreground text-xl font-bold sm:text-2xl">
+                  결제 정보
+                </h2>
+
+                {/* 토스페이먼츠 결제위젯 */}
+                <div id="payment-widget" className="w-full" />
+
+                {/* 토스페이먼츠 약관 동의 위젯 */}
+                <div id="agreement" className="w-full" />
+
+                <Button
+                  onClick={handleCompleteOrder}
+                  disabled={isProcessing || !widgetReady}
+                  size="lg"
+                  className="w-full rounded-lg text-sm disabled:cursor-not-allowed disabled:opacity-50 sm:text-base"
+                >
+                  {isProcessing
+                    ? "처리 중..."
+                    : widgetReady
+                      ? "결제하기"
+                      : "결제 준비 중..."}
+                </Button>
               </div>
             </div>
 
-            <div className="bg-card border-border space-y-6 rounded-lg border p-6">
-              <h2 className="text-foreground text-2xl font-bold">결제 정보</h2>
-
-              {/* 토스페이먼츠 결제위젯 */}
-              <div id="payment-widget" className="w-full" />
-
-              {/* 토스페이먼츠 약관 동의 위젯 */}
-              <div id="agreement" className="w-full" />
-
-              <Button
-                onClick={handleCompleteOrder}
-                disabled={isProcessing || !widgetReady}
-                size="lg"
-                className="w-full rounded-lg disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {isProcessing
-                  ? "처리 중..."
-                  : widgetReady
-                    ? "결제하기"
-                    : "결제 준비 중..."}
-              </Button>
-            </div>
-          </div>
-
-          {/* Order Summary Sidebar */}
-          <div className="lg:col-span-1">
-            <div className="bg-card border-border sticky top-24 space-y-6 rounded-lg border p-6">
-              <div>
-                <h3 className="text-foreground mb-4 font-semibold">
-                  낙찰 상품
-                </h3>
-                <div className="border-border mb-4 overflow-hidden rounded-lg border">
-                  <img
-                    src={winningProduct.image || "/placeholder.svg"}
-                    alt={winningProduct.title}
-                    className="aspect-square w-full object-cover"
-                  />
+            {/* Order Summary Sidebar */}
+            <div className="lg:col-span-1">
+              <div className="bg-card border-border sticky top-20 space-y-4 rounded-lg border p-4 sm:space-y-6 sm:p-6 lg:top-24">
+                <div>
+                  <h3 className="text-foreground mb-3 text-sm font-semibold sm:mb-4 sm:text-base">
+                    낙찰 상품
+                  </h3>
+                  <div className="border-border mb-3 overflow-hidden rounded-lg border sm:mb-4">
+                    <img
+                      src={winningProduct.image || "/placeholder.svg"}
+                      alt={winningProduct.title}
+                      className="aspect-square w-full object-cover"
+                    />
+                  </div>
+                  <p className="text-foreground line-clamp-2 text-xs font-medium sm:text-sm">
+                    {winningProduct.title}
+                  </p>
+                  <p className="text-muted-foreground mt-1 text-xs">
+                    {winningProduct.seller}
+                  </p>
                 </div>
-                <p className="text-foreground line-clamp-2 text-sm font-medium">
-                  {winningProduct.title}
-                </p>
-                <p className="text-muted-foreground mt-1 text-xs">
-                  {winningProduct.seller}
-                </p>
-              </div>
 
-              <div className="border-border space-y-3 border-b pb-4">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">낙찰가</span>
-                  <span className="text-foreground font-medium">
-                    {formatCurrency(winningProduct.winningBid)}
+                <div className="border-border space-y-2 border-b pb-3 sm:space-y-3 sm:pb-4">
+                  <div className="flex justify-between text-xs sm:text-sm">
+                    <span className="text-muted-foreground">낙찰가</span>
+                    <span className="text-foreground font-medium">
+                      {formatCurrency(winningProduct.winningBid)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-xs sm:text-sm">
+                    <span className="text-muted-foreground">배송료</span>
+                    <span className="text-foreground font-medium">
+                      {formatCurrency(shippingFee)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-xs sm:text-sm">
+                    <span className="text-muted-foreground">수수료</span>
+                    <span className="text-foreground font-medium">
+                      {formatCurrency(tax)}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-foreground text-sm font-semibold sm:text-base">
+                    총액
+                  </span>
+                  <span className="text-foreground text-xl font-bold sm:text-2xl">
+                    {formatCurrency(totalAmount)}
                   </span>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">배송료</span>
-                  <span className="text-foreground font-medium">
-                    {formatCurrency(shippingFee)}
-                  </span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">수수료</span>
-                  <span className="text-foreground font-medium">
-                    {formatCurrency(tax)}
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <span className="text-foreground font-semibold">총액</span>
-                <span className="text-foreground text-2xl font-bold">
-                  {formatCurrency(totalAmount)}
-                </span>
               </div>
             </div>
           </div>
-        </div>
         )}
       </div>
     </main>

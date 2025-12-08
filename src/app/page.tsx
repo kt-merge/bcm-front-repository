@@ -128,18 +128,19 @@ function HomeContent() {
   return (
     <main className="bg-background min-h-screen">
       {/* Hero Section */}
-      <section className="border-border border-b py-12 md:py-20">
+      <section className="border-border border-b py-8 sm:py-12 md:py-16 lg:py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="space-y-4">
-            <h1 className="text-foreground text-4xl font-bold tracking-tight text-balance md:text-5xl">
+          <div className="space-y-3 sm:space-y-4">
+            <h1 className="text-foreground text-2xl font-bold tracking-tight text-balance sm:text-3xl md:text-4xl lg:text-5xl">
               Blind Chicken Market
             </h1>
-            <p className="text-muted-foreground max-w-2xl text-xl leading-relaxed text-pretty">
-              The Last Bidder Wins. This is Blind Chicken Market. <br />
+            <p className="text-muted-foreground max-w-2xl text-[10px] leading-relaxed text-pretty sm:text-sm md:text-base lg:text-lg">
+              The Last Bidder Wins. This is Blind Chicken Market.
+              <br />
               가장 늦게, 가장 용감하게. 블라인드 치킨 마켓에서 승리하세요.
             </p>
 
-            <div className="flex gap-3 pt-4">
+            <div className="flex gap-3 pt-2 sm:pt-4">
               {user && (
                 <Button size="lg" asChild className="rounded-lg">
                   <Link href="/products/create">상품 등록</Link>
@@ -151,14 +152,14 @@ function HomeContent() {
       </section>
 
       {/* Products Grid */}
-      <section className="py-12 md:py-10">
+      <section className="py-8 sm:py-10 md:py-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-8 flex items-center justify-between">
+          <div className="mb-6 flex flex-col gap-3 sm:mb-8 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="font-bold">
+              <p className="text-sm font-bold sm:text-base">
                 {searchQuery ? `"${searchQuery}" 검색 결과` : "Hot Items🔥"}
               </p>
-              <p className="text-muted-foreground text-sm">
+              <p className="text-muted-foreground text-xs sm:text-sm">
                 {searchQuery
                   ? `총 ${totalItems}개 중 ${sortedProducts.length}개 표시`
                   : `Showing ${sortedProducts.length} items`}
@@ -170,7 +171,7 @@ function HomeContent() {
                 id="sort-select"
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as SortOption)}
-                className="border-input bg-background ring-offset-background focus:ring-ring rounded-md border px-3 py-2 text-sm focus:ring-2 focus:ring-offset-2 focus:outline-none"
+                className="border-input bg-background ring-offset-background focus:ring-ring w-full rounded-md border px-3 py-2 text-sm focus:ring-2 focus:ring-offset-2 focus:outline-none sm:w-auto"
               >
                 <option value="latest">최신순</option>
                 <option value="ending-soon">마감임박순</option>
