@@ -1,4 +1,4 @@
-import Navigation from "@/components/common/navigation";
+import Navigation from "@/components/common/Navigation";
 import MobileBottomNav from "@/components/common/MobileBottomNav";
 import "./globals.css";
 import type { Metadata } from "next";
