@@ -2,6 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
+  images: {
+    unoptimized: true, // 로컬 blob URL 지원
+  },
   async rewrites() {
     return [
       {
