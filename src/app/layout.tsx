@@ -1,4 +1,5 @@
 import Navigation from "@/components/common/navigation";
+import MobileBottomNav from "@/components/common/MobileBottomNav";
 import "./globals.css";
 import type { Metadata } from "next";
 import { AuthProvider } from "@/hooks/user/useAuth";
@@ -14,15 +15,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko">
+    <html lang="ko" className="h-full">
       <head>
         <script src="https://js.tosspayments.com/v2/standard"></script>
       </head>
-      <body>
+      <body className="flex h-full flex-col">
         <AuthProvider>
           <Navigation />
-          <main>{children}</main>
-          <footer>
+          <main className="flex-1 overflow-y-auto pb-16 md:pb-0">
+            {children}
+          </main>
+          <MobileBottomNav />
+          <footer className="hidden md:block">
             <div>© 2025 Darius Team</div>
           </footer>
         </AuthProvider>

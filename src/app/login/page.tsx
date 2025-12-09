@@ -74,8 +74,8 @@ export default function Login() {
 
   // user가 null일 때 (로그아웃 상태)만 폼을 렌더링
   return (
-    <main className="bg-background flex min-h-screen items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md space-y-8">
+    <main className="bg-background flex h-[calc(100vh-60px)] items-center justify-center px-4">
+      <div className="w-full max-w-md space-y-6">
         {/* Header */}
         <div className="space-y-2 text-center">
           <h1 className="text-foreground text-3xl font-bold">로그인</h1>
@@ -140,59 +140,59 @@ export default function Login() {
 
         {/* Footer */}
         <div className="space-y-2 text-center">
-          <p className="text-muted-foreground text-sm">
-            계정이 없으신가요?{" "}
+          <div className="text-muted-foreground flex items-center justify-center gap-4 text-sm">
             <Link
               href="/signup"
               className="text-primary font-medium hover:underline"
             >
-              회원가입
+              이메일 가입
             </Link>
-          </p>
-          <Dialog open={isResetOpen} onOpenChange={setIsResetOpen}>
-            {/* 버튼 역할 (누르면 모달 열림) */}
-            <DialogTrigger asChild>
-              <button
-                type="button"
-                className="text-primary block w-full text-center text-sm font-medium hover:underline"
-              >
-                비밀번호를 잊으셨나요?
-              </button>
-            </DialogTrigger>
-
-            {/* 모달창 내용 */}
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle>비밀번호 찾기</DialogTitle>
-                <DialogDescription>
-                  비밀번호 재설정 링크를 확인할 이메일 주소를 입력해주세요.
-                </DialogDescription>
-              </DialogHeader>
-
-              <div className="space-y-4 py-4">
-                <input
-                  type="email"
-                  value={resetEmail}
-                  onChange={(e) => setResetEmail(e.target.value)}
-                  placeholder="your@example.com"
-                  className="bg-background border-border text-foreground placeholder-muted-foreground focus:ring-primary w-full rounded-lg border px-4 py-3 transition-all focus:ring-2 focus:outline-none"
-                />
-                <Button
+            <span>|</span>
+            <Dialog open={isResetOpen} onOpenChange={setIsResetOpen}>
+              {/* 버튼 역할 (누르면 모달 열림) */}
+              <DialogTrigger asChild>
+                <button
                   type="button"
-                  className="w-full"
-                  onClick={handleResetPassword}
-                  disabled={!resetEmail || isResetLoading}
+                  className="text-primary font-medium hover:underline"
                 >
-                  {/* 로딩 중이면 아이콘 보여주기 */}
-                  {isResetLoading ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    "링크 보내기"
-                  )}
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+                  비밀번호 찾기
+                </button>
+              </DialogTrigger>
+
+              {/* 모달창 내용 */}
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>비밀번호 찾기</DialogTitle>
+                  <DialogDescription>
+                    비밀번호 재설정 링크를 확인할 이메일 주소를 입력해주세요.
+                  </DialogDescription>
+                </DialogHeader>
+
+                <div className="space-y-4 py-4">
+                  <input
+                    type="email"
+                    value={resetEmail}
+                    onChange={(e) => setResetEmail(e.target.value)}
+                    placeholder="your@example.com"
+                    className="bg-background border-border text-foreground placeholder-muted-foreground focus:ring-primary w-full rounded-lg border px-4 py-3 transition-all focus:ring-2 focus:outline-none"
+                  />
+                  <Button
+                    type="button"
+                    className="w-full"
+                    onClick={handleResetPassword}
+                    disabled={!resetEmail || isResetLoading}
+                  >
+                    {/* 로딩 중이면 아이콘 보여주기 */}
+                    {isResetLoading ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      "링크 보내기"
+                    )}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
       </div>
     </main>

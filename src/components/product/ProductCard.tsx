@@ -36,7 +36,7 @@ export default function ProductCard({
     <Link href={`/products/${product.id}?page=${currentPage}`}>
       <div className="group flex h-full cursor-pointer flex-col">
         {/* Image Container */}
-        <div className="bg-muted border-border relative mb-4 flex aspect-square items-center justify-center overflow-hidden rounded-lg border">
+        <div className="bg-muted border-border relative mb-3 flex aspect-square items-center justify-center overflow-hidden rounded-lg border sm:mb-4">
           <img
             src={product.imageUrl || "/placeholder.svg"}
             alt={product.name}
@@ -47,13 +47,13 @@ export default function ProductCard({
         </div>
 
         {/* Info */}
-        <div className="flex flex-1 flex-col space-y-3">
-          <h3 className="text-foreground line-clamp-2 font-semibold text-balance transition-opacity group-hover:opacity-75">
+        <div className="flex flex-1 flex-col space-y-2 sm:space-y-3">
+          <h3 className="text-foreground line-clamp-2 text-sm font-semibold text-balance transition-opacity group-hover:opacity-75 sm:text-base">
             {product.name}
           </h3>
 
           <div className="space-y-1">
-            <p className="text-foreground text-2xl font-bold break-all">
+            <p className="text-foreground text-lg font-bold break-all sm:text-xl md:text-2xl">
               {formatCurrency(product.bidPrice)}
             </p>
             <span className="text-muted-foreground flex items-center gap-1 text-xs font-medium">
