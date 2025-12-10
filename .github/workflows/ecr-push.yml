@@ -38,7 +38,9 @@ jobs:
           IMAGE_URI=$ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
 
           echo "BULDING DOCKER IMAGE: $IMAGE_URI"
-          docker build -t $IMAGE_URI .
+          docker build \
+            --build-arg NEXT_PUBLIC_API_URL=http://bcm.u-jinlee1029.store:8080 \
+            -t $IMAGE_URI .
 
           echo "PUSHING DOCKER IMAGE TO ECR: $IMAGE_URI"
           docker push $IMAGE_URI
