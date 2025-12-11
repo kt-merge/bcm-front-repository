@@ -55,7 +55,7 @@ jobs:
           docker run -d \
             --name bcm-front \
             -p 3000:3000 \
-            -e NEXT_PUBLIC_API_URL="http://bcm.u-jinlee1029.store:8080" \
+            -e NEXT_PUBLIC_API_URL="https://bcm.u-jinlee1029.store:8080" \
             --restart unless-stopped \
             $IMAGE_URI
 
