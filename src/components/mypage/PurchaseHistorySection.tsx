@@ -7,21 +7,17 @@ import { getStatClass } from "@/lib/utils";
 
 interface PurchaseHistorySectionProps {
   purchaseBidding: MypageProductBid[];
-  orders: Order[];
+  paymentPendingOrders: Order[];
+  completedOrders: Order[];
   onPayment: (orderId: number | string, productName: string) => void;
 }
 
 export default function PurchaseHistorySection({
   purchaseBidding,
-  orders,
+  paymentPendingOrders,
+  completedOrders,
   onPayment,
 }: PurchaseHistorySectionProps) {
-  const paymentPendingOrders = orders.filter(
-    (order) => order.orderStatus === "PAYMENT_PENDING",
-  );
-  const completedOrders = orders.filter(
-    (order) => order.orderStatus === "PAID",
-  );
   const totalCount =
     purchaseBidding.length +
     paymentPendingOrders.length +

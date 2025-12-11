@@ -77,7 +77,7 @@ export function useUserProfile() {
   const handleProfileSave = async (
     nickname: string,
     phoneNumber: string,
-  ): Promise<boolean> => {
+  ): Promise<void> => {
     try {
       setError(null);
       await apiPut("/api/users/me", {
@@ -90,12 +90,11 @@ export function useUserProfile() {
         nickname,
         phoneNumber,
       }));
-
-      return true;
     } catch (e) {
       console.error("Failed to save profile:", e);
-      setError("프로필 저장에 실패했습니다.");
-      return false;
+      const errorMsg = "프로필 저장에 실패했습니다.";
+      setError(errorMsg);
+      throw new Error(errorMsg);
     }
   };
 

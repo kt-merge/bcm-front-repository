@@ -19,7 +19,8 @@ export default function MyPage() {
   const { user, isLoading, handleProfileSave } = useUserProfile();
   const {
     purchaseBidding,
-    orders,
+    paymentPendingOrders,
+    completedOrders,
     sellingBidding,
     sellingPending,
     sellingCompleted,
@@ -52,7 +53,8 @@ export default function MyPage() {
             {/* === 구매 내역 섹션 === */}
             <PurchaseHistorySection
               purchaseBidding={purchaseBidding}
-              orders={orders}
+              paymentPendingOrders={paymentPendingOrders}
+              completedOrders={completedOrders}
               onPayment={handlePayment}
             />
 

@@ -27,7 +27,7 @@ interface UserProfile {
 interface ProfileSectionProps {
   user: UserProfile;
   isLoading: boolean;
-  onSave: (nickname: string, phoneNumber: string) => Promise<boolean | void>;
+  onSave: (nickname: string, phoneNumber: string) => Promise<void>;
   onUpdateNickname?: (nickname: string) => void;
 }
 
@@ -61,11 +61,7 @@ export default function ProfileSection({
 
     try {
       setIsSaving(true);
-      const result = await onSave(trimmedNick, trimmedPhone);
-      if (result === false) {
-        alert("프로필 수정에 실패했습니다.");
-        return;
-      }
+      await onSave(trimmedNick, trimmedPhone);
       onUpdateNickname?.(trimmedNick);
       setIsModalOpen(false);
       alert("프로필이 성공적으로 변경되었습니다.");

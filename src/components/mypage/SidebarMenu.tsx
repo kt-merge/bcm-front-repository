@@ -3,7 +3,7 @@
 export default function SidebarMenu() {
   return (
     <aside className="shrink-0 lg:w-50">
-      <div className="sticky top-12 pt-6 md:pt-8">
+      <div className="sticky top-12">
         <h2 className="text-foreground mb-4 text-lg font-bold">마이 페이지</h2>
 
         {/* 쇼핑 정보 섹션 */}
