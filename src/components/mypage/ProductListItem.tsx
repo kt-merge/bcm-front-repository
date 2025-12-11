@@ -1,0 +1,73 @@
+"use client";
+
+import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+import { PRODUCT_STATUS } from "@/lib/constants";
+import { formatCurrency } from "@/lib/utils";
+
+interface ProductListItemProps {
+  id: number | string;
+  name: string;
+  price: number;
+  status?: string;
+  subText?: string;
+  badgeText?: string;
+  linkPrefix?: string;
+  actionNode?: React.ReactNode;
+}
+
+const getProductStatusLabel = (status?: string) => {
+  if (!status) return "";
+  const item = PRODUCT_STATUS.find((s) => s.value === status.toUpperCase());
+  return item ? item.label : status;
+};
+
+export function ProductListItem({
+  id,
+  name,
+  price,
+  status,
+  subText,
+  badgeText,
+  linkPrefix = "/products",
+  actionNode,
+}: ProductListItemProps) {
+  return (
+    <div className="hover:bg-muted/50 border-border flex items-center justify-between border-b p-4 transition-colors last:border-b-0">
+      <Link
+        href={`${linkPrefix}/${id}`}
+        className="flex flex-1 items-center justify-between pr-4"
+      >
+        {/* 상품 정보 */}
+        <div>
+          <div className="flex items-center gap-2">
+            <p className="text-foreground font-medium">{name}</p>
+            {badgeText && (
+              <Badge
+                variant="secondary"
+                className="h-5 px-1.5 py-0 text-[10px]"
+              >
+                {badgeText}
+              </Badge>
+            )}
+          </div>
+          <div className="text-muted-foreground mt-1 flex items-center gap-2 text-xs">
+            {status && <span>{getProductStatusLabel(status)}</span>}
+            {status && subText && <span>•</span>}
+            {subText && <span>{subText}</span>}
+          </div>
+        </div>
+
+        {/* 가격 정보 */}
+        <div className="text-right">
+          <p className="text-foreground font-bold">{formatCurrency(price)}</p>
+        </div>
+      </Link>
+
+      {/* 액션 버튼이 있을 경우 렌더링 */}
+      {actionNode && (
+        <div className="border-border ml-4 border-l pl-4">{actionNode}</div>
+      )}
+    </div>
+  );
+}

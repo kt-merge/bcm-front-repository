@@ -21,8 +21,8 @@ export default function ProductsHeader({
   onSortChange,
 }: ProductsHeaderProps) {
   return (
-    <div className="mb-6 flex flex-col gap-3 sm:mb-8 sm:flex-row sm:items-center sm:justify-between">
-      <div>
+    <div className="mb-6 flex items-center justify-between gap-2 sm:mb-8 sm:gap-3">
+      <div className="min-w-0 flex-1">
         <p className="text-sm font-bold sm:text-base">
           {searchQuery ? `"${searchQuery}" 검색 결과` : "Hot Items🔥"}
         </p>
@@ -33,12 +33,12 @@ export default function ProductsHeader({
         </p>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex shrink-0 items-center gap-2">
         <select
           id="sort-select"
           value={sortBy}
           onChange={(e) => onSortChange(e.target.value as SortOption)}
-          className="border-input bg-background ring-offset-background focus:ring-ring w-full rounded-md border px-3 py-2 text-sm focus:ring-2 focus:ring-offset-2 focus:outline-none sm:w-auto"
+          className="border-input bg-background ring-offset-background focus:ring-ring rounded-md border px-2 py-1 text-xs focus:ring-2 focus:ring-offset-2 focus:outline-none sm:px-3 sm:py-2 sm:text-sm"
         >
           <option value="latest">최신순</option>
           <option value="ending-soon">마감임박순</option>

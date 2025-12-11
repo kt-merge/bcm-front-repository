@@ -76,7 +76,7 @@ git clone https://github.com/KT-Darius/blind-chicken-market.git
 npm install
 
 # 3. 환경 변수 설정 (.env)
-NEXT_PUBLIC_API_URL=http://www.ktdarius.shop:8080
+NEXT_PUBLIC_API_URL=http://localhost:8080
 
 # 5. 개발 서버 실행
 npm run dev

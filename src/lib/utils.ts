@@ -61,6 +61,47 @@ export function formatKoreanTime(dateString: string | Date): string {
 }
 
 /**
+ * 가입 날짜를 "YYYY년 M월 가입" 형식으로 포맷팅합니다.
+ * @param isoString - ISO 8601 형식의 날짜 문자열
+ * @returns 포맷팅된 가입 날짜 문자열 (예: "2025년 12월 가입")
+ */
+export function formatJoinDate(isoString: string): string {
+  const date = new Date(isoString);
+  return `${date.getFullYear()}년 ${date.getMonth() + 1}월 가입`;
+}
+
+/**
+ * 마이페이지 통계 섹션에서 수치에 따라 Tailwind CSS 클래스를 동적으로 생성합니다.
+ * @param count - 통계 수치
+ * @param isPrimary - true면 주색상(primary), false면 기본색상(foreground) 사용
+ * @param isTitle - true면 제목 스타일, false면 본문 스타일 적용
+ * @returns 적용할 Tailwind CSS 클래스 문자열
+ */
+export function getStatClass(
+  count: number,
+  isPrimary?: boolean,
+  isTitle?: boolean,
+): string {
+  const isBold = count > 0;
+
+  if (isTitle) {
+    if (isBold) {
+      return isPrimary ? "text-primary font-bold" : "text-foreground font-bold";
+    } else {
+      return "text-muted-foreground";
+    }
+  }
+
+  if (isBold) {
+    return isPrimary
+      ? "text-primary mt-1 text-xl font-bold"
+      : "text-foreground mt-1 text-xl font-semibold";
+  } else {
+    return "text-muted-foreground mt-1 text-xl font-semibold";
+  }
+}
+
+/**
  * JWT 토큰의 payload를 디코딩합니다.
  * @param token - JWT 액세스 토큰
  * @returns 디코딩된 payload 객체 또는 null
