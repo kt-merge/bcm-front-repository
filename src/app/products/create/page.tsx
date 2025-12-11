@@ -130,7 +130,7 @@ export default function CreateProductPage() {
   // user가 존재할 때만 페이지 렌더링
   return (
     <main className="bg-background min-h-screen py-4 md:py-8">
-      <div className="mx-auto max-w-3xl px-3 sm:px-4">
+      <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-4 md:mb-6">
           <h1 className="text-foreground text-xl font-bold md:text-2xl">

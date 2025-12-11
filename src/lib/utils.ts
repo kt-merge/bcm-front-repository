@@ -61,6 +61,16 @@ export function formatKoreanTime(dateString: string | Date): string {
 }
 
 /**
+ * 가입 날짜를 "YYYY년 M월 가입" 형식으로 포맷팅합니다.
+ * @param isoString - ISO 8601 형식의 날짜 문자열
+ * @returns 포맷팅된 가입 날짜 문자열 (예: "2025년 12월 가입")
+ */
+export function formatJoinDate(isoString: string): string {
+  const date = new Date(isoString);
+  return `${date.getFullYear()}년 ${date.getMonth() + 1}월 가입`;
+}
+
+/**
  * JWT 토큰의 payload를 디코딩합니다.
  * @param token - JWT 액세스 토큰
  * @returns 디코딩된 payload 객체 또는 null

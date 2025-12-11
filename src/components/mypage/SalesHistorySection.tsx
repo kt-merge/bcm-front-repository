@@ -1,0 +1,249 @@
+"use client";
+
+import type { Product } from "@/types";
+import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+import { PRODUCT_STATUS } from "@/lib/constants";
+import { formatCurrency } from "@/lib/utils";
+
+interface SalesHistorySectionProps {
+  sellingBidding: Product[];
+  sellingPending: Product[];
+  sellingCompleted: Product[];
+  getStatClass: (
+    count: number,
+    isPrimary?: boolean,
+    isTitle?: boolean,
+  ) => string;
+}
+
+const getProductStatusLabel = (status?: string) => {
+  if (!status) return "";
+  const item = PRODUCT_STATUS.find((s) => s.value === status.toUpperCase());
+  return item ? item.label : status;
+};
+
+interface ProductListItemProps {
+  id: number | string;
+  name: string;
+  price: number;
+  status?: string;
+  subText?: string;
+  badgeText?: string;
+  linkPrefix?: string;
+  actionNode?: React.ReactNode;
+}
+
+function ProductListItem({
+  id,
+  name,
+  price,
+  status,
+  subText,
+  badgeText,
+  linkPrefix = "/products",
+  actionNode,
+}: ProductListItemProps) {
+  return (
+    <div className="hover:bg-muted/50 border-border flex items-center justify-between border-b p-4 transition-colors last:border-b-0">
+      <Link
+        href={`${linkPrefix}/${id}`}
+        className="flex flex-1 items-center justify-between pr-4"
+      >
+        {/* 상품 정보 */}
+        <div>
+          <div className="flex items-center gap-2">
+            <p className="text-foreground font-medium">{name}</p>
+            {badgeText && (
+              <Badge
+                variant="secondary"
+                className="h-5 px-1.5 py-0 text-[10px]"
+              >
+                {badgeText}
+              </Badge>
+            )}
+          </div>
+          <div className="text-muted-foreground mt-1 flex items-center gap-2 text-xs">
+            {status && <span>{getProductStatusLabel(status)}</span>}
+            {status && subText && <span>•</span>}
+            {subText && <span>{subText}</span>}
+          </div>
+        </div>
+
+        {/* 가격 정보 */}
+        <div className="text-right">
+          <p className="text-foreground font-bold">{formatCurrency(price)}</p>
+        </div>
+      </Link>
+
+      {/* 액션 버튼이 있을 경우 렌더링 */}
+      {actionNode && (
+        <div className="border-border ml-4 border-l pl-4">{actionNode}</div>
+      )}
+    </div>
+  );
+}
+
+interface SalesHistorySectionProps {
+  sellingBidding: Product[];
+  sellingPending: Product[];
+  sellingCompleted: Product[];
+  getStatClass: (
+    count: number,
+    isPrimary?: boolean,
+    isTitle?: boolean,
+  ) => string;
+}
+
+export default function SalesHistorySection({
+  sellingBidding,
+  sellingPending,
+  sellingCompleted,
+  getStatClass,
+}: SalesHistorySectionProps) {
+  const totalCount =
+    sellingBidding.length + sellingPending.length + sellingCompleted.length;
+
+  return (
+    <section className="mb-10">
+      <h2 className="mb-4 text-lg font-semibold">판매 내역</h2>
+
+      {/* 요약 바 */}
+      <div className="border-border bg-card mb-6 rounded-lg border p-4">
+        <div className="grid grid-cols-4 text-center text-sm">
+          {/* 1. 전체 */}
+          <div className="border-border border-r">
+            <p className={getStatClass(totalCount, false, true)}>전체</p>
+            <p className={getStatClass(totalCount, false, false)}>
+              {totalCount}
+            </p>
+          </div>
+
+          {/* 2. 입찰 중 */}
+          <div>
+            <p className={getStatClass(sellingBidding.length, false, true)}>
+              입찰 중
+            </p>
+            <p className={getStatClass(sellingBidding.length, false, false)}>
+              {sellingBidding.length}
+            </p>
+          </div>
+
+          {/* 3. 입금 대기 */}
+          <div>
+            <p className={getStatClass(sellingPending.length, true, true)}>
+              입금 대기
+            </p>
+            <p className={getStatClass(sellingPending.length, true, false)}>
+              {sellingPending.length}
+            </p>
+          </div>
+
+          {/* 4. 판매 완료 */}
+          <div>
+            <p className={getStatClass(sellingCompleted.length, false, true)}>
+              판매 완료
+            </p>
+            <p className={getStatClass(sellingCompleted.length, false, false)}>
+              {sellingCompleted.length}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* 입찰 중 목록 */}
+      <div className="mb-6">
+        <h3 className="text-muted-foreground mb-3 text-sm font-medium">
+          입찰 중
+        </h3>
+        <div className="border-border bg-card rounded-lg border">
+          {sellingBidding.length === 0 ? (
+            <div className="py-8 text-center">
+              <p className="text-muted-foreground text-sm">
+                현재 입찰 중인 상품이 없습니다.
+              </p>
+            </div>
+          ) : (
+            sellingBidding.map((product) => (
+              <ProductListItem
+                key={product.id}
+                id={product.id}
+                name={product.name}
+                price={product.bidPrice ?? product.startPrice}
+                status={product.productStatus}
+                subText={`전체 입찰 횟수: ${product.bidCount}`}
+              />
+            ))
+          )}
+        </div>
+      </div>
+
+      {/* 입금 대기 목록 */}
+      <div className="mb-6">
+        <h3
+          className={`mb-3 text-sm font-medium ${
+            sellingPending.length > 0
+              ? "text-primary font-bold"
+              : "text-muted-foreground"
+          }`}
+        >
+          입금 대기
+        </h3>
+        <div
+          className={`rounded-lg border ${
+            sellingPending.length > 0
+              ? "border-primary/20 bg-primary/5"
+              : "border-border bg-card"
+          }`}
+        >
+          {sellingPending.length === 0 ? (
+            <div className="py-8 text-center">
+              <p className="text-muted-foreground text-sm">
+                결제 확인을 기다리는 상품이 없습니다.
+              </p>
+            </div>
+          ) : (
+            sellingPending.map((product) => (
+              <ProductListItem
+                key={product.id}
+                id={product.id}
+                name={product.name}
+                price={product.bidPrice ?? product.startPrice}
+                status={product.productStatus}
+                subText="구매자 결제 대기 중"
+              />
+            ))
+          )}
+        </div>
+      </div>
+
+      {/* 판매 완료 목록 */}
+      <div>
+        <h3 className="text-muted-foreground mb-3 text-sm font-medium">
+          판매 완료
+        </h3>
+        <div className="border-border bg-card rounded-lg border">
+          {sellingCompleted.length === 0 ? (
+            <div className="py-8 text-center">
+              <p className="text-muted-foreground text-sm">
+                판매 완료된 상품이 없습니다.
+              </p>
+            </div>
+          ) : (
+            sellingCompleted.map((product) => (
+              <ProductListItem
+                key={product.id}
+                id={product.id}
+                name={product.name}
+                price={product.bidPrice ?? product.startPrice}
+                status={product.productStatus}
+                badgeText="판매 완료"
+                subText="결제 완료됨"
+              />
+            ))
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
