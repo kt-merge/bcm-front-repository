@@ -1,106 +1,20 @@
 "use client";
 
 import type { MypageProductBid, Order } from "@/types";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { PRODUCT_STATUS } from "@/lib/constants";
-import { formatCurrency } from "@/lib/utils";
+import { ProductListItem } from "@/components/mypage/ProductListItem";
+import { getStatClass } from "@/lib/utils";
 
 interface PurchaseHistorySectionProps {
   purchaseBidding: MypageProductBid[];
   orders: Order[];
   onPayment: (orderId: number | string, productName: string) => void;
-  getStatClass: (
-    count: number,
-    isPrimary?: boolean,
-    isTitle?: boolean,
-  ) => string;
-}
-
-const getProductStatusLabel = (status?: string) => {
-  if (!status) return "";
-  const item = PRODUCT_STATUS.find((s) => s.value === status.toUpperCase());
-  return item ? item.label : status;
-};
-
-interface ProductListItemProps {
-  id: number | string;
-  name: string;
-  price: number;
-  status?: string;
-  subText?: string;
-  badgeText?: string;
-  linkPrefix?: string;
-  actionNode?: React.ReactNode;
-}
-
-function ProductListItem({
-  id,
-  name,
-  price,
-  status,
-  subText,
-  badgeText,
-  linkPrefix = "/products",
-  actionNode,
-}: ProductListItemProps) {
-  return (
-    <div className="hover:bg-muted/50 border-border flex items-center justify-between border-b p-4 transition-colors last:border-b-0">
-      <Link
-        href={`${linkPrefix}/${id}`}
-        className="flex flex-1 items-center justify-between pr-4"
-      >
-        {/* 상품 정보 */}
-        <div>
-          <div className="flex items-center gap-2">
-            <p className="text-foreground font-medium">{name}</p>
-            {badgeText && (
-              <Badge
-                variant="secondary"
-                className="h-5 px-1.5 py-0 text-[10px]"
-              >
-                {badgeText}
-              </Badge>
-            )}
-          </div>
-          <div className="text-muted-foreground mt-1 flex items-center gap-2 text-xs">
-            {status && <span>{getProductStatusLabel(status)}</span>}
-            {status && subText && <span>•</span>}
-            {subText && <span>{subText}</span>}
-          </div>
-        </div>
-
-        {/* 가격 정보 */}
-        <div className="text-right">
-          <p className="text-foreground font-bold">{formatCurrency(price)}</p>
-        </div>
-      </Link>
-
-      {/* 액션 버튼이 있을 경우 렌더링 */}
-      {actionNode && (
-        <div className="border-border ml-4 border-l pl-4">{actionNode}</div>
-      )}
-    </div>
-  );
-}
-
-interface PurchaseHistorySectionProps {
-  purchaseBidding: MypageProductBid[];
-  orders: Order[];
-  onPayment: (orderId: number | string, productName: string) => void;
-  getStatClass: (
-    count: number,
-    isPrimary?: boolean,
-    isTitle?: boolean,
-  ) => string;
 }
 
 export default function PurchaseHistorySection({
   purchaseBidding,
   orders,
   onPayment,
-  getStatClass,
 }: PurchaseHistorySectionProps) {
   const paymentPendingOrders = orders.filter(
     (order) => order.orderStatus === "PAYMENT_PENDING",

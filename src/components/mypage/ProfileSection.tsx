@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -41,6 +41,14 @@ export default function ProfileSection({
   const [nicknameInput, setNicknameInput] = useState(user.nickname);
   const [phoneNumberInput, setPhoneNumberInput] = useState(user.phoneNumber);
   const [isSaving, setIsSaving] = useState(false);
+
+  // 모달이 열릴 때마다 user prop의 최신 값으로 입력 필드 동기화
+  useEffect(() => {
+    if (isModalOpen) {
+      setNicknameInput(user.nickname);
+      setPhoneNumberInput(user.phoneNumber);
+    }
+  }, [isModalOpen, user]);
 
   const handleSave = async () => {
     const trimmedNick = nicknameInput.trim();
