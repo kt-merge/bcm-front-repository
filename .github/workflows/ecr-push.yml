@@ -39,7 +39,7 @@ jobs:
 
           echo "BULDING DOCKER IMAGE: $IMAGE_URI"
           docker build \
-            --build-arg NEXT_PUBLIC_API_URL=https://bcm.u-jinlee1029.store:8080 \
+            --build-arg NEXT_PUBLIC_API_URL=https://bcm.u-jinlee1029.store \
             -t $IMAGE_URI .
 
           echo "PUSHING DOCKER IMAGE TO ECR: $IMAGE_URI"
