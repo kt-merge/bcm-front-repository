@@ -24,6 +24,15 @@ export interface User {
   phoneNumber: string;
 }
 
+// 카테고리
+export interface Category {
+  id: number;
+  code: string;
+  name: string;
+  createdAt: string;
+  modifiedAt: string;
+}
+
 // POST 회원가입
 export interface SignUpRequest {
   email: string;
@@ -63,7 +72,7 @@ export interface Product {
   id: number;
   name: string;
   description: string;
-  category: string;
+  category: Category;
   startPrice: number;
   bidPrice: number;
   bidCount: number;
@@ -114,6 +123,29 @@ export interface CreateProductRequest {
 // GET 상품 리스트
 export interface ProductListResponse {
   content: Product[];
+  pageable: Pageable;
+  last: boolean;
+  totalElements: number;
+  totalPages: number;
+  first: boolean;
+  numberOfElements: number;
+  size: number;
+  number: number;
+  sort: Sort;
+  empty: boolean;
+}
+
+// 상품 카테고리
+export interface Category {
+  id: number;
+  code: string;
+  name: string;
+  createdAt: string;
+  modifiedAt: string;
+}
+
+export interface CategoryListResponse {
+  content: Category[];
   pageable: Pageable;
   last: boolean;
   totalElements: number;

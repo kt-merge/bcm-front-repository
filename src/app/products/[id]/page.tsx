@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Product } from "@/types";
+import { Product, Category } from "@/types";
 import { apiGet } from "@/lib/api";
 import {
   formatCurrency,
@@ -19,11 +20,7 @@ import { useAuth } from "@/hooks/user/useAuth";
 import ProductDetailSkeleton from "@/components/product/ProductDetailSkeleton";
 import mockData from "@/mocks/products.json";
 
-import {
-  PRODUCT_CATEGORIES,
-  PRODUCT_STATUS,
-  BID_STATUS,
-} from "@/lib/constants";
+import { PRODUCT_STATUS, BID_STATUS } from "@/lib/constants";
 
 import SockJs from "sockjs-client";
 import { Client } from "@stomp/stompjs";
@@ -81,12 +78,15 @@ export default function ProductDetail({
       } catch (err) {
         console.error("상품 조회 실패:", err);
         // API 호출 실패 시 목 데이터에서 찾기
-        const mockProduct = (mockData as Product[]).find(
-          (p) => p.id.toString() === productId,
+        const mockProducts = Array.isArray(mockData)
+          ? mockData
+          : (mockData as unknown as { content: Product[] })?.content || [];
+        const mockProduct = mockProducts.find(
+          (p) => String(p?.id) === productId,
         );
         if (mockProduct) {
           console.log("mock 데이터에서 상품을 불러왔습니다.");
-          setProductData(mockProduct, true);
+          setProductData(mockProduct as Product, true);
         } else {
           setError("상품을 불러오는데 실패했습니다.");
         }
@@ -185,12 +185,9 @@ export default function ProductDetail({
     return statusItem ? statusItem.label : status;
   };
 
-  // 카테고리 한글 변환
-  const getCategoryName = (category: string) => {
-    const categoryItem = PRODUCT_CATEGORIES.find(
-      (item) => item.value === category,
-    );
-    return categoryItem ? categoryItem.label : category;
+  // 카테고리 한글 변환 (Category 객체에서 name 추출)
+  const getCategoryName = (category: Category) => {
+    return category.name;
   };
 
   // 입찰 상태 한글 변환
@@ -310,9 +307,11 @@ export default function ProductDetail({
           {/* Product Image */}
           <div className="lg:col-span-2">
             <div className="bg-muted border-border flex aspect-square items-center justify-center overflow-hidden rounded-xl border shadow-sm">
-              <img
+              <Image
                 src={product.imageUrl || "/placeholder.svg"}
                 alt={product.name}
+                width={600}
+                height={600}
                 className="h-full w-full object-cover"
               />
             </div>
