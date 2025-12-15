@@ -5,6 +5,12 @@ export interface Sort {
   unsorted: boolean;
 }
 
+// 이미지 URL
+export interface ProductImage {
+  id: number;
+  imageUrl: string;
+}
+
 // 페이지 정보
 export interface Pageable {
   pageNumber: number;
@@ -78,7 +84,7 @@ export interface Product {
   bidCount: number;
   bidStatus: string;
   productStatus: string;
-  imageUrl: string;
+  imageUrls: ProductImage[];
   user: User;
   createdAt: string;
   bidEndDate: string;
@@ -113,11 +119,11 @@ export interface ProductBid {
 export interface CreateProductRequest {
   name: string;
   description: string;
-  category: string;
-  startPrice: number;
-  bidEndDate: Date;
+  categoryId: number;
+  price: number;
+  bidEndDate: string;
   productStatus: string;
-  imageUrl: string;
+  imageUrls: string[];
 }
 
 // GET 상품 리스트
@@ -175,7 +181,6 @@ export type ProductFormData = {
   startPrice: string; // string으로 입력받고, 전송 시 number로 변환
   bidEndDate?: string; // 경매 종료 날짜 (YYYY-MM-DD)
   productStatus: "GOOD" | "BAD" | "NEW" | string;
-  imageUrl?: string;
 };
 
 export type Order = {
@@ -212,7 +217,7 @@ export interface OrderDetail {
   product: {
     id: number;
     name: string;
-    imageUrl: string;
+    imageUrls: ProductImage[];
     user: {
       nickname: string;
     };

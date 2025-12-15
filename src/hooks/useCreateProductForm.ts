@@ -46,7 +46,6 @@ export function useCreateProductForm() {
     startPrice: "0",
     bidEndDate: defaultBidEndDate,
     productStatus: "GOOD",
-    imageUrl: "",
   });
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
@@ -213,25 +212,22 @@ export function useCreateProductForm() {
     setError(null);
 
     try {
-      // S3에 이미지 업로드
-      for (const file of imageFiles) {
-        const presignedResponse = await apiPost<{ url: string }>(
-          "/api/s3/upload-url",
-          {
-            fileName: file.name,
-          },
-        );
+      // S3에 이미지 업로드 - 모든 파일 이름을 배열로 요청
+      const fileNames = imageFiles.map((file) => file.name);
+      const uploadUrls = await apiPost<string[]>("/api/s3/upload-url", {
+        uploadUrls: fileNames,
+      });
 
-        await fetch(presignedResponse.url, {
+      // 각 파일을 presigned URL로 업로드
+      for (let i = 0; i < imageFiles.length; i++) {
+        await fetch(uploadUrls[i], {
           method: "PUT",
           headers: {
-            "Content-Type": file.type,
+            "Content-Type": imageFiles[i].type,
           },
-          body: file,
+          body: imageFiles[i],
         });
       }
-
-      const mainImage = imageFiles[mainImageIndex] || imageFiles[0];
 
       // 종료 날짜를 현재 시간 이후의 랜덤한 시간으로 설정
       let bidEndDateString = null;
@@ -265,16 +261,27 @@ export function useCreateProductForm() {
         bidEndDateString = `${formData.bidEndDate}T${hours}:${minutes}:${seconds}`;
       }
 
+      // 메인 이미지를 첫 번째로, 나머지 이미지들을 배열로 구성
+      const mainImage = imageFiles[mainImageIndex];
+      const otherImages = imageFiles.filter((_, idx) => idx !== mainImageIndex);
+      const imageUrls = [mainImage, ...otherImages].map((file) => file.name);
+
       const productData = {
         name: formData.name,
-        description: formData.description,
+        description: formData.description || "",
         categoryId:
           categories.find((c) => c.value === formData.category)?.id || 1,
         price: formData.startPrice ? parseInt(formData.startPrice, 10) : 0,
         bidEndDate: bidEndDateString,
         productStatus: formData.productStatus,
-        imageUrl: mainImage?.name,
+        imageUrls: imageUrls,
       };
+
+      console.log("Product Data:", productData);
+      console.log(
+        "Image Files:",
+        imageFiles.map((f) => f.name),
+      );
 
       const result = await apiPost<{ id: number }>(
         "/api/products",
@@ -285,7 +292,8 @@ export function useCreateProductForm() {
       router.push(`/products/${result.id}`);
     } catch (err) {
       console.error("상품 등록 실패:", err);
-      setError("상품 등록에 실패했습니다. 다시 시도해주세요.");
+      alert("상품 등록에 실패했습니다. 다시 시도해주세요.");
+      setError(null);
     } finally {
       setIsLoading(false);
     }

@@ -102,7 +102,7 @@ export default function CheckoutPage({
         setWinningProduct({
           id: orderData.product.id,
           title: orderData.product.name,
-          image: orderData.product.imageUrl,
+          image: orderData.product.imageUrls[0]?.imageUrl,
           winningBid: orderData.bidPrice,
           seller: orderData.product.user.nickname,
           estimatedDelivery: "3-5 영업일",

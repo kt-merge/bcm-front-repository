@@ -15,6 +15,7 @@ import {
   formatKoreanTime,
 } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { useAuth } from "@/hooks/user/useAuth";
 import ProductDetailSkeleton from "@/components/product/ProductDetailSkeleton";
@@ -46,6 +47,7 @@ export default function ProductDetail({
   const [showAllBids, setShowAllBids] = useState(false);
   const [bidError, setBidError] = useState<string | null>(null);
   const [isUsingMockData, setIsUsingMockData] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   // productId 초기화
   useEffect(() => {
@@ -236,6 +238,20 @@ export default function ProductDetail({
     return `${diffHours}시간`;
   };
 
+  const handlePrevImage = () => {
+    if (!product?.imageUrls || product.imageUrls.length === 0) return;
+    setCurrentImageIndex((prev) =>
+      prev === 0 ? product.imageUrls.length - 1 : prev - 1,
+    );
+  };
+
+  const handleNextImage = () => {
+    if (!product?.imageUrls || product.imageUrls.length === 0) return;
+    setCurrentImageIndex((prev) =>
+      prev === product.imageUrls.length - 1 ? 0 : prev + 1,
+    );
+  };
+
   const handlePlaceBid = () => {
     if (!bidAmount || isNaN(Number(bidAmount))) {
       setBidError("입찰가를 입력해주세요.");
@@ -304,16 +320,53 @@ export default function ProductDetail({
         </Link>
 
         <div className="grid grid-cols-1 gap-6 sm:gap-8 md:gap-10 lg:grid-cols-3 lg:gap-12">
-          {/* Product Image */}
+          {/* Product Image Gallery */}
           <div className="lg:col-span-2">
-            <div className="bg-muted border-border flex aspect-square items-center justify-center overflow-hidden rounded-xl border shadow-sm">
+            <div className="bg-muted border-border relative flex aspect-square items-center justify-center overflow-hidden rounded-xl border shadow-sm">
               <Image
-                src={product.imageUrl || "/placeholder.svg"}
+                src={
+                  product.imageUrls[currentImageIndex]?.imageUrl ||
+                  "/placeholder.svg"
+                }
                 alt={product.name}
                 width={600}
                 height={600}
+                quality={100}
                 className="h-full w-full object-cover"
               />
+
+              {product.imageUrls.length > 1 && (
+                <>
+                  <button
+                    aria-label="이전 이미지"
+                    onClick={handlePrevImage}
+                    className="focus:ring-primary absolute top-1/2 left-3 inline-flex -translate-y-1/2 items-center justify-center rounded-full bg-white/70 p-2 text-black shadow-md backdrop-blur-sm transition hover:bg-white focus:ring-2 focus:outline-none"
+                  >
+                    <ChevronLeft className="h-5 w-5" />
+                  </button>
+                  <button
+                    aria-label="다음 이미지"
+                    onClick={handleNextImage}
+                    className="focus:ring-primary absolute top-1/2 right-3 inline-flex -translate-y-1/2 items-center justify-center rounded-full bg-white/70 p-2 text-black shadow-md backdrop-blur-sm transition hover:bg-white focus:ring-2 focus:outline-none"
+                  >
+                    <ChevronRight className="h-5 w-5" />
+                  </button>
+                  <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-black/40 px-3 py-1">
+                    {product.imageUrls.map((_, i) => (
+                      <button
+                        key={i}
+                        aria-label={`이미지 ${i + 1}`}
+                        onClick={() => setCurrentImageIndex(i)}
+                        className={`h-2.5 w-2.5 rounded-full transition ${
+                          currentImageIndex === i
+                            ? "bg-white"
+                            : "bg-white/50 hover:bg-white/80"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
