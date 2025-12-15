@@ -135,15 +135,7 @@ export interface ProductListResponse {
   empty: boolean;
 }
 
-// 상품 카테고리
-export interface Category {
-  id: number;
-  code: string;
-  name: string;
-  createdAt: string;
-  modifiedAt: string;
-}
-
+// 카테고리 응답
 export interface CategoryListResponse {
   content: Category[];
   pageable: Pageable;

@@ -64,7 +64,7 @@ export function useCreateProductForm() {
     }
   }, [user, isAuthLoading, router]);
 
-  const fetchCategories = useCallback(async () => {
+  const initializeFormCategory = useCallback(() => {
     // 카테고리가 로드되면 폼 데이터 초기화
     setFormData((prev) => {
       const hasCategory =
@@ -78,8 +78,8 @@ export function useCreateProductForm() {
   }, [categories]);
 
   useEffect(() => {
-    fetchCategories();
-  }, [fetchCategories]);
+    initializeFormCategory();
+  }, [initializeFormCategory]);
 
   useEffect(() => {
     return () => {
@@ -125,7 +125,7 @@ export function useCreateProductForm() {
       const newFiles: File[] = [];
       const newUrls: string[] = [];
 
-      for (const file of filesToAdd) {
+      filesToAdd.forEach((file, index) => {
         const { ext, name: originalName } = getFileNameAndExt(file.name);
         const isValidType = allowedFormats.includes(file.type.toLowerCase());
         const isValidExt = allowedExtensions.includes(ext.toLowerCase());
@@ -134,19 +134,19 @@ export function useCreateProductForm() {
           alert(
             "PNG, JPG, JPEG, GIF, WEBP 형식의 이미지만 업로드할 수 있습니다.",
           );
-          continue;
+          return;
         }
 
         const timestamp = Date.now();
         const safeExt = ext || file.type.split("/")[1] || "img";
-        const newFileName = `${originalName}_${timestamp}.${safeExt}`;
+        const newFileName = `${originalName}_${timestamp}_${index}.${safeExt}`;
 
         const renamedFile = new File([file], newFileName, { type: file.type });
         const newUrl = URL.createObjectURL(renamedFile);
 
         newFiles.push(renamedFile);
         newUrls.push(newUrl);
-      }
+      });
 
       if (newFiles.length) {
         setImageFiles((prev) => [...prev, ...newFiles]);
@@ -269,7 +269,7 @@ export function useCreateProductForm() {
         name: formData.name,
         description: formData.description,
         categoryId:
-          categories.find((c) => c.value === formData.category)?.id || 0,
+          categories.find((c) => c.value === formData.category)?.id || 1,
         price: formData.startPrice ? parseInt(formData.startPrice, 10) : 0,
         bidEndDate: bidEndDateString,
         productStatus: formData.productStatus,
