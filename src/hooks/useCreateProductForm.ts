@@ -1,15 +1,38 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { apiPost } from "@/lib/api";
 
 import { useAuth } from "@/hooks/user/useAuth";
+import { useCategories } from "@/hooks/useCategories";
 import { ProductFormData } from "@/types";
+
+const MAX_IMAGES = 5;
+
+// 파일명/확장자 분리
+const getFileNameAndExt = (fileName: string) => {
+  const lastDot = fileName.lastIndexOf(".");
+  if (lastDot === -1) {
+    return { name: fileName, ext: "" };
+  }
+  const name = fileName.slice(0, lastDot);
+  const ext = fileName.slice(lastDot + 1);
+  return { name, ext };
+};
 
 export function useCreateProductForm() {
   const router = useRouter();
   const { user, isLoading: isAuthLoading } = useAuth();
+
+  const allowedFormats = useMemo(
+    () => ["image/png", "image/jpg", "image/jpeg", "image/gif", "image/webp"],
+    [],
+  );
+  const allowedExtensions = useMemo(
+    () => ["png", "jpg", "jpeg", "gif", "webp"],
+    [],
+  );
 
   const [step, setStep] = useState(1);
   const defaultBidEndDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
@@ -19,7 +42,7 @@ export function useCreateProductForm() {
   const [formData, setFormData] = useState<ProductFormData>({
     name: "",
     description: "",
-    category: "ELECTRONICS",
+    category: "",
     startPrice: "0",
     bidEndDate: defaultBidEndDate,
     productStatus: "GOOD",
@@ -27,8 +50,12 @@ export function useCreateProductForm() {
   });
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [mainImageIndex, setMainImageIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // 카테고리 로직 분리
+  const { categories, isLoading: isCategoriesLoading } = useCategories();
 
   useEffect(() => {
     if (!isAuthLoading && user === null) {
@@ -36,6 +63,23 @@ export function useCreateProductForm() {
       router.push("/login");
     }
   }, [user, isAuthLoading, router]);
+
+  const initializeFormCategory = useCallback(() => {
+    // 카테고리가 로드되면 폼 데이터 초기화
+    setFormData((prev) => {
+      const hasCategory =
+        prev.category && categories.some((c) => c.value === prev.category);
+      const fallback = categories[0]?.value || "";
+      return {
+        ...prev,
+        category: hasCategory ? prev.category : fallback,
+      };
+    });
+  }, [categories]);
+
+  useEffect(() => {
+    initializeFormCategory();
+  }, [initializeFormCategory]);
 
   useEffect(() => {
     return () => {
@@ -52,8 +96,90 @@ export function useCreateProductForm() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleStartPriceChange = useCallback((value: string) => {
+    if (value === "" || value.length <= 12) {
+      setFormData((prev) => ({ ...prev, startPrice: value }));
+    }
+  }, []);
+
+  const handleBidEndDateChange = useCallback((value: string) => {
+    setFormData((prev) => ({ ...prev, bidEndDate: value }));
+  }, []);
+
   const handleNextStep = () => step < 4 && setStep(step + 1);
   const handlePrevStep = () => step > 1 && setStep(step - 1);
+
+  const handleImageUpload = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = Array.from(e.target.files || []);
+      if (!files.length) return;
+
+      const available = MAX_IMAGES - imageFiles.length;
+      if (available <= 0) {
+        alert(`사진은 최대 ${MAX_IMAGES}장까지 업로드할 수 있습니다.`);
+        e.target.value = "";
+        return;
+      }
+
+      const filesToAdd = files.slice(0, available);
+      const newFiles: File[] = [];
+      const newUrls: string[] = [];
+
+      filesToAdd.forEach((file, index) => {
+        const { ext, name: originalName } = getFileNameAndExt(file.name);
+        const isValidType = allowedFormats.includes(file.type.toLowerCase());
+        const isValidExt = allowedExtensions.includes(ext.toLowerCase());
+
+        if (!isValidType && !isValidExt) {
+          alert(
+            "PNG, JPG, JPEG, GIF, WEBP 형식의 이미지만 업로드할 수 있습니다.",
+          );
+          return;
+        }
+
+        const timestamp = Date.now();
+        const safeExt = ext || file.type.split("/")[1] || "img";
+        const newFileName = `${originalName}_${timestamp}_${index}.${safeExt}`;
+
+        const renamedFile = new File([file], newFileName, { type: file.type });
+        const newUrl = URL.createObjectURL(renamedFile);
+
+        newFiles.push(renamedFile);
+        newUrls.push(newUrl);
+      });
+
+      if (newFiles.length) {
+        setImageFiles((prev) => [...prev, ...newFiles]);
+        setUploadedImages((prev) => [...prev, ...newUrls]);
+        setMainImageIndex((prev) =>
+          imageFiles.length === 0 && prev === 0 ? 0 : prev,
+        );
+      }
+
+      e.target.value = "";
+    },
+    [allowedExtensions, allowedFormats, imageFiles.length],
+  );
+
+  const removeImage = useCallback((indexToRemove: number) => {
+    setUploadedImages((prev) => {
+      const next = prev.filter((_, i) => i !== indexToRemove);
+      // 대상 URL은 제거 후 안전하게 revoke
+      const targetUrl = prev[indexToRemove];
+      if (targetUrl) URL.revokeObjectURL(targetUrl);
+      return next;
+    });
+    setImageFiles((prev) => {
+      const next = prev.filter((_, i) => i !== indexToRemove);
+      setMainImageIndex((prevMain) => {
+        if (next.length === 0) return 0;
+        if (prevMain === indexToRemove) return 0;
+        if (prevMain > indexToRemove) return prevMain - 1;
+        return prevMain;
+      });
+      return next;
+    });
+  }, []);
 
   const handleSubmit = async () => {
     if (imageFiles.length === 0) {
@@ -105,6 +231,8 @@ export function useCreateProductForm() {
         });
       }
 
+      const mainImage = imageFiles[mainImageIndex] || imageFiles[0];
+
       // 종료 날짜를 현재 시간 이후의 랜덤한 시간으로 설정
       let bidEndDateString = null;
       if (formData.bidEndDate) {
@@ -140,11 +268,12 @@ export function useCreateProductForm() {
       const productData = {
         name: formData.name,
         description: formData.description,
-        category: formData.category,
+        categoryId:
+          categories.find((c) => c.value === formData.category)?.id || 1,
         price: formData.startPrice ? parseInt(formData.startPrice, 10) : 0,
         bidEndDate: bidEndDateString,
         productStatus: formData.productStatus,
-        imageUrl: imageFiles[0].name,
+        imageUrl: mainImage?.name,
       };
 
       const result = await apiPost<{ id: number }>(
@@ -163,22 +292,37 @@ export function useCreateProductForm() {
   };
 
   const isPageLoading = isAuthLoading || (!isAuthLoading && user === null);
+  const remainingUploads = useMemo(
+    () => MAX_IMAGES - imageFiles.length,
+    [imageFiles.length],
+  );
+  const isFormValid = useMemo(
+    () => formData.name && formData.startPrice && imageFiles.length > 0,
+    [formData.name, formData.startPrice, imageFiles.length],
+  );
 
   return {
     step,
     formData,
+    categories,
+    mainImageIndex,
     uploadedImages,
     imageFiles,
     isLoading,
     error,
     isPageLoading,
+    isCategoriesLoading,
+    remainingUploads,
+    isFormValid,
     handleNextStep,
     handlePrevStep,
     handleSubmit,
     handleInputChange,
-    setFormData,
-    setUploadedImages,
-    setImageFiles,
+    handleStartPriceChange,
+    handleBidEndDateChange,
+    handleImageUpload,
+    removeImage,
+    setMainImageIndex,
     user,
   };
 }

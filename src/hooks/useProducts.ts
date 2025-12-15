@@ -68,7 +68,9 @@ export function useProducts(searchQuery: string = "", pageSize: number = 6) {
         const matchDescription = product.description
           .toLowerCase()
           .includes(query);
-        const matchCategory = product.category.toLowerCase().includes(query);
+        const matchCategory = product.category.name
+          .toLowerCase()
+          .includes(query);
         return matchName || matchDescription || matchCategory;
       });
     }

@@ -3,59 +3,32 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Upload, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useCreateProductForm } from "@/hooks/useCreateProductForm";
-import { PRODUCT_CATEGORIES, PRODUCT_STATUS } from "@/lib/constants";
-import { useEffect } from "react";
-import Image from "next/image";
-
-// 랜덤 6글자 (영문 대/소문자 + 숫자)
-const generateRandomId = (length = 6) => {
-  const chars =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  let result = "";
-  for (let i = 0; i < length; i++) {
-    const idx = Math.floor(Math.random() * chars.length);
-    result += chars[idx];
-  }
-  return result;
-};
-
-// 파일명/확장자 분리
-const getFileNameAndExt = (fileName: string) => {
-  const lastDot = fileName.lastIndexOf(".");
-  if (lastDot === -1) {
-    return { name: fileName, ext: "" };
-  }
-  const name = fileName.slice(0, lastDot);
-  const ext = fileName.slice(lastDot + 1);
-  return { name, ext };
-};
+import { PRODUCT_STATUS } from "@/lib/constants";
+import ProductPhotosSection from "@/components/product/ProductPhotosSection";
 
 export default function CreateProductPage() {
   const {
     formData,
+    categories,
+    mainImageIndex,
     uploadedImages,
     imageFiles,
     isLoading,
     error,
     isPageLoading,
+    isCategoriesLoading,
+    remainingUploads,
+    isFormValid,
     handleSubmit,
     handleInputChange,
-    setFormData,
-    setUploadedImages,
-    setImageFiles,
+    handleStartPriceChange,
+    handleBidEndDateChange,
+    handleImageUpload,
+    removeImage,
+    setMainImageIndex,
   } = useCreateProductForm();
-
-  useEffect(() => {
-    if (imageFiles.length > uploadedImages.length) {
-      const missingCount = imageFiles.length - uploadedImages.length;
-      const newUrls = imageFiles
-        .slice(-missingCount)
-        .map((file) => URL.createObjectURL(file));
-      setUploadedImages((prev) => [...prev, ...newUrls]);
-    }
-  }, [imageFiles.length, uploadedImages.length, imageFiles, setUploadedImages]);
 
   // useAuth가 로딩 중이거나, user가 없어 리디렉션 될 때
   if (isPageLoading) {
@@ -65,67 +38,6 @@ export default function CreateProductPage() {
       </div>
     );
   }
-
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-
-    if (imageFiles.length >= 1) {
-      alert("사진은 1개만 업로드할 수 있습니다.");
-      e.target.value = "";
-      return;
-    }
-
-    const file = files[0];
-    if (!file) return;
-
-    // 허용된 파일 형식 검증
-    const allowedFormats = [
-      "image/png",
-      "image/jpg",
-      "image/jpeg",
-      "image/gif",
-      "image/webp",
-    ];
-    const allowedExtensions = ["png", "jpg", "jpeg", "gif", "webp"];
-
-    const { ext } = getFileNameAndExt(file.name);
-    const isValidType = allowedFormats.includes(file.type.toLowerCase());
-    const isValidExt = allowedExtensions.includes(ext.toLowerCase());
-
-    if (!isValidType && !isValidExt) {
-      alert("PNG, JPG, JPEG, GIF, WEBP 형식의 이미지만 업로드할 수 있습니다.");
-      e.target.value = "";
-      return;
-    }
-
-    // 새 파일 이름 생성 로직
-    const { name: originalName } = getFileNameAndExt(file.name);
-    const randomId = generateRandomId(6);
-    const safeExt = ext || file.type.split("/")[1] || "img";
-    const newFileName = `${originalName}_${safeExt}_${randomId}.${safeExt}`;
-
-    // 이름만 바꾼 새 File 객체 생성
-    const renamedFile = new File([file], newFileName, { type: file.type });
-    const newUrl = URL.createObjectURL(renamedFile);
-
-    setImageFiles([renamedFile]);
-    setUploadedImages([newUrl]);
-
-    e.target.value = "";
-  };
-
-  const removeImage = (indexToRemove: number) => {
-    const urlToRemove = uploadedImages[indexToRemove];
-    if (urlToRemove) {
-      URL.revokeObjectURL(urlToRemove);
-    }
-    setUploadedImages((prev) => prev.filter((_, i) => i !== indexToRemove));
-    setImageFiles((prev) => prev.filter((_, i) => i !== indexToRemove));
-  };
-
-  const remainingUploads = 1 - imageFiles.length;
-  const isFormValid =
-    formData.name && formData.startPrice && imageFiles.length > 0;
 
   // user가 존재할 때만 페이지 렌더링
   return (
@@ -146,44 +58,15 @@ export default function CreateProductPage() {
         <div className="space-y-3 md:space-y-4">
           {/* Section 1: Photos */}
           <Card className="border-border bg-card border p-3 md:p-4">
-            <h3 className="text-foreground mb-2 text-sm font-semibold md:text-base">
-              상품 사진 <span className="text-red-500">*</span>
-            </h3>
-
-            <div className="flex gap-2">
-              {/* Upload Box */}
-              {remainingUploads > 0 && (
-                <label className="border-border hover:bg-muted flex h-20 w-20 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed transition-colors md:h-24 md:w-24">
-                  <Upload className="text-muted-foreground h-6 w-6 md:h-8 md:w-8" />
-                  <input
-                    type="file"
-                    accept="image/png,image/jpg,image/jpeg,image/gif,image/webp"
-                    onChange={handleImageUpload}
-                    className="hidden"
-                    disabled={imageFiles.length >= 1}
-                  />
-                </label>
-              )}
-
-              {/* Uploaded Images */}
-              {uploadedImages.map((img, idx) => (
-                <div key={idx} className="group relative">
-                  <Image
-                    src={img || "/placeholder.svg"}
-                    alt={`Upload ${idx + 1}`}
-                    width={96}
-                    height={96}
-                    className="border-border h-20 w-20 rounded-lg border object-cover md:h-24 md:w-24"
-                  />
-                  <button
-                    onClick={() => removeImage(idx)}
-                    className="bg-destructive text-primary-foreground absolute -top-1 -right-1 rounded-full p-1 text-xs opacity-100 md:opacity-0 md:group-hover:opacity-100"
-                  >
-                    ✕
-                  </button>
-                </div>
-              ))}
-            </div>
+            <ProductPhotosSection
+              images={uploadedImages}
+              files={imageFiles}
+              mainIndex={mainImageIndex}
+              remainingUploads={remainingUploads}
+              onUpload={handleImageUpload}
+              onRemove={removeImage}
+              onSetMain={setMainImageIndex}
+            />
           </Card>
 
           {/* Section 2: Product Details */}
@@ -219,7 +102,17 @@ export default function CreateProductPage() {
                     onChange={handleInputChange}
                     className="border-border bg-background text-foreground focus:ring-primary h-9 w-full rounded-md border px-2 text-sm focus:ring-2 focus:outline-none md:text-base"
                   >
-                    {PRODUCT_CATEGORIES.map((cat) => (
+                    {isCategoriesLoading && (
+                      <option value="" disabled>
+                        카테고리 불러오는 중...
+                      </option>
+                    )}
+                    {!isCategoriesLoading && categories.length === 0 && (
+                      <option value="" disabled>
+                        카테고리가 없습니다
+                      </option>
+                    )}
+                    {categories.map((cat) => (
                       <option key={cat.value} value={cat.value}>
                         {cat.label}
                       </option>
@@ -283,15 +176,7 @@ export default function CreateProductPage() {
                     name="startPrice"
                     placeholder="0"
                     value={formData.startPrice}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      if (value === "" || value.length <= 12) {
-                        setFormData((prev) => ({
-                          ...prev,
-                          startPrice: value,
-                        }));
-                      }
-                    }}
+                    onChange={(e) => handleStartPriceChange(e.target.value)}
                     className="h-9 flex-1 text-sm md:text-base"
                     step="1"
                     min="0"
@@ -308,12 +193,7 @@ export default function CreateProductPage() {
                   type="date"
                   name="bidEndDate"
                   value={formData.bidEndDate || ""}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      bidEndDate: e.target.value,
-                    }))
-                  }
+                  onChange={(e) => handleBidEndDateChange(e.target.value)}
                   min={new Date().toISOString().split("T")[0]}
                   className="h-9 w-full text-sm md:text-base"
                 />
