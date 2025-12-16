@@ -38,7 +38,7 @@ export default function ProductCard({
         {/* Image Container */}
         <div className="bg-muted border-border relative mb-3 flex aspect-square items-center justify-center overflow-hidden rounded-lg border sm:mb-4">
           <img
-            src={product.imageUrl || "/placeholder.svg"}
+            src={product.imageUrls[0]?.imageUrl || "/placeholder.svg"}
             alt={product.name}
             className={`h-full w-full object-cover transition-transform duration-300 group-hover:scale-105 ${
               isExpired() ? "opacity-50 grayscale" : ""

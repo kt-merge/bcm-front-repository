@@ -15,7 +15,16 @@
     "bidCount": 12,
     "bidStatus": "BIDDED",
     "productStatus": "GOOD",
-    "imageUrl": "/product01.jpeg",
+    "imageUrls": [
+      {
+        "id": 1,
+        "imageUrl": "/product01.jpeg"
+      },
+      {
+        "id": 2,
+        "imageUrl": "/product12.png"
+      }
+    ],
     "user": {
       "id": 1,
       "nickname": "테크마니아",

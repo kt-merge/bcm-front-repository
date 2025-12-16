@@ -16,7 +16,6 @@ export default function CreateProductPage() {
     uploadedImages,
     imageFiles,
     isLoading,
-    error,
     isPageLoading,
     isCategoriesLoading,
     remainingUploads,
@@ -49,10 +48,6 @@ export default function CreateProductPage() {
             상품 등록
           </h1>
         </div>
-
-        {error && (
-          <p className="text-destructive mb-3 text-center text-sm">{error}</p>
-        )}
 
         {/* Form */}
         <div className="space-y-3 md:space-y-4">
