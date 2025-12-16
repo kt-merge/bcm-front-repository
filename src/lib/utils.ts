@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { TIME_CONSTANTS } from "@/lib/constants";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -34,6 +35,36 @@ export function getTimeRemainMs(bidEndDate: string | Date): number {
   const now = new Date().getTime();
   const endDate = new Date(bidEndDate).getTime();
   return endDate - now;
+}
+
+/**
+ * 경매 종료까지 남은 시간을 사람이 읽기 쉬운 형태로 반환합니다.
+ * @param bidEndDate - 경매 종료 날짜 (ISO 8601 문자열 또는 Date 객체)
+ * @returns 남은 시간 문자열 (예: "3일 5시간", "12시간", "경매가 곧 마감됩니다") 또는 null (경매 종료)
+ */
+export function getTimeRemainingText(bidEndDate: string | Date): string | null {
+  const diffMs = getTimeRemainMs(bidEndDate);
+
+  if (diffMs <= 0) return null;
+
+  const millisecondsPerHour =
+    TIME_CONSTANTS.MILLISECONDS_PER_SECOND *
+    TIME_CONSTANTS.SECONDS_PER_MINUTE *
+    TIME_CONSTANTS.MINUTES_PER_HOUR;
+
+  const diffHours = Math.floor(diffMs / millisecondsPerHour);
+
+  if (diffHours < 1) {
+    return "경매가 곧 마감됩니다";
+  }
+
+  const diffDays = Math.floor(diffHours / TIME_CONSTANTS.HOURS_PER_DAY);
+  const remainingHours = diffHours % TIME_CONSTANTS.HOURS_PER_DAY;
+
+  if (diffDays > 0) {
+    return `${diffDays}일 ${remainingHours}시간`;
+  }
+  return `${diffHours}시간`;
 }
 
 /**
@@ -106,6 +137,58 @@ export function getStatClass(
  * @param token - JWT 액세스 토큰
  * @returns 디코딩된 payload 객체 또는 null
  */
+/**
+ * 금액 구간별 최소 입찰 단위를 계산합니다 (10의 제곱 기반).
+ * @param currentPrice - 현재 입찰가
+ * @returns 최소 입찰 단위 (예: 100만원 → 10만원, 1000만원 → 100만원)
+ */
+export function getMinBidIncrement(currentPrice: number): number {
+  if (currentPrice === 0) return 1000;
+
+  // 현재 가격의 자릿수를 구함 (10의 제곱)
+  const magnitude = Math.pow(10, Math.floor(Math.log10(currentPrice)));
+
+  // 한 자릿수 아래 단위로 입찰 (예: 100만원 → 10만원, 1000만원 → 100만원)
+  return Math.max(magnitude / 10, 1000);
+}
+
+/**
+ * 상품 상태를 한글 라벨로 변환합니다.
+ * @param status - 상품 상태 (GOOD, AVERAGE, BAD)
+ * @param statusList - 상태 목록 (PRODUCT_STATUS)
+ * @returns 한글 라벨 또는 원래 값
+ */
+export function getProductStatusLabel(
+  status: string,
+  statusList: Array<{ label: string; value: string }>,
+): string {
+  const statusItem = statusList.find((item) => item.value === status);
+  return statusItem ? statusItem.label : status;
+}
+
+/**
+ * 입찰 상태를 한글 라벨로 변환합니다.
+ * @param status - 입찰 상태 (NOT_BIDDED, BIDDED, PAYMENT_WAITING, COMPLETED)
+ * @param statusList - 상태 목록 (BID_STATUS)
+ * @returns 한글 라벨 또는 원래 값
+ */
+export function getBidStatusLabel(
+  status: string,
+  statusList: Array<{ label: string; value: string }>,
+): string {
+  const statusItem = statusList.find((item) => item.value === status);
+  return statusItem ? statusItem.label : status;
+}
+
+/**
+ * Category 객체에서 이름을 추출합니다.
+ * @param category - Category 객체
+ * @returns 카테고리 이름
+ */
+export function getCategoryNameString(category: { name: string }): string {
+  return category.name;
+}
+
 export function decodeJWT<T = Record<string, unknown>>(
   token: string,
 ): T | null {
