@@ -2,10 +2,25 @@
  * 상품 상태 (ERD: product_status ENUM)
  */
 export const PRODUCT_STATUS = [
+  { label: "미개봉", value: "UNOPENED" },
   { label: "좋음", value: "GOOD" },
   { label: "보통", value: "AVERAGE" },
   { label: "나쁨", value: "BAD" },
-];
+] as const;
+
+export type ProductStatus = (typeof PRODUCT_STATUS)[number]["value"];
+
+/**
+ * 주문 상태 (ERD: order_status ENUM)
+ */
+export const ORDER_STATUS = [
+  { label: "결제 대기", value: "PAYMENT_PENDING" },
+  { label: "결제 완료", value: "PAID" },
+  { label: "기간 만료", value: "EXPIRED" },
+  { label: "취소됨", value: "CANCELLED" },
+] as const;
+
+export type OrderStatus = (typeof ORDER_STATUS)[number]["value"];
 
 /**
  * 경매 상태
@@ -15,7 +30,9 @@ export const BID_STATUS = [
   { label: "입찰중", value: "BIDDED" },
   { label: "낙찰완료", value: "PAYMENT_WAITING" },
   { label: "종료", value: "COMPLETED" },
-];
+] as const;
+
+export type BidStatus = (typeof BID_STATUS)[number]["value"];
 
 /**
  * WebSocket 연결 설정

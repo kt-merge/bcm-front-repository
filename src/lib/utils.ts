@@ -160,7 +160,9 @@ export function getMinBidIncrement(currentPrice: number): number {
  */
 export function getStatusLabel(
   status: string,
-  statusList: Array<{ label: string; value: string }>,
+  statusList:
+    | { label: string; value: string }[]
+    | readonly { label: string; value: string }[],
 ): string {
   const statusItem = statusList.find((item) => item.value === status);
   return statusItem ? statusItem.label : status;
@@ -171,7 +173,9 @@ export function getStatusLabel(
  */
 export function getProductStatusLabel(
   status: string,
-  statusList: Array<{ label: string; value: string }>,
+  statusList:
+    | { label: string; value: string }[]
+    | readonly { label: string; value: string }[],
 ): string {
   return getStatusLabel(status, statusList);
 }
@@ -181,7 +185,9 @@ export function getProductStatusLabel(
  */
 export function getBidStatusLabel(
   status: string,
-  statusList: Array<{ label: string; value: string }>,
+  statusList:
+    | { label: string; value: string }[]
+    | readonly { label: string; value: string }[],
 ): string {
   return getStatusLabel(status, statusList);
 }

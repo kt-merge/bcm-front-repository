@@ -1,3 +1,5 @@
+import { ProductStatus, OrderStatus, BidStatus } from "@/lib/constants";
+
 // 정렬 정보
 export interface Sort {
   empty: boolean;
@@ -82,8 +84,8 @@ export interface Product {
   startPrice: number;
   bidPrice: number;
   bidCount: number;
-  bidStatus: string;
-  productStatus: string;
+  bidStatus: BidStatus;
+  productStatus: ProductStatus;
   imageUrls: ProductImage[];
   user: User;
   createdAt: string;
@@ -96,7 +98,7 @@ export interface WinnerDetails {
   bidPrice: number;
   productId: string;
   productName: string;
-  productStatus: string;
+  productStatus: ProductStatus;
 }
 
 export interface MypageProductBid {
@@ -122,7 +124,8 @@ export interface CreateProductRequest {
   categoryId: number;
   price: number;
   bidEndDate: string;
-  productStatus: string;
+  productStatus: ProductStatus;
+  thumbnail: string;
   imageUrls: string[];
 }
 
@@ -180,7 +183,7 @@ export type ProductFormData = {
   category: string;
   startPrice: string; // string으로 입력받고, 전송 시 number로 변환
   bidEndDate?: string; // 경매 종료 날짜 (YYYY-MM-DD)
-  productStatus: "GOOD" | "BAD" | "NEW" | string;
+  productStatus: ProductStatus;
 };
 
 export type Order = {
@@ -189,8 +192,6 @@ export type Order = {
   bidPrice: number;
   orderStatus: OrderStatus;
 };
-
-export type OrderStatus = "PAYMENT_PENDING" | "PAID";
 
 export interface ShippingInfo {
   name: string;
