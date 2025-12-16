@@ -5,7 +5,7 @@
  * - Refresh Token은 HttpOnly 쿠키로 자동 전송
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+import { API_BASE_URL } from "@/lib/constants";
 
 let isRefreshing = false;
 let refreshSubscribers: Array<(token: string | null) => void> = [];

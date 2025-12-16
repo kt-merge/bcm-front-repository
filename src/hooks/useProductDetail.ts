@@ -9,12 +9,14 @@ import {
   getMinBidIncrement,
   getTimeRemainingText,
 } from "@/lib/utils";
-import { WEBSOCKET_CONFIG, BID_AMOUNT_LIMITS } from "@/lib/constants";
+import {
+  WEBSOCKET_CONFIG,
+  BID_AMOUNT_LIMITS,
+  API_BASE_URL,
+} from "@/lib/constants";
 import mockData from "@/mocks/products.json";
 import SockJs from "sockjs-client";
 import { Client } from "@stomp/stompjs";
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
 interface UseProductDetailParams {
   params: Promise<{ id: string }> | { id: string };
@@ -136,14 +138,18 @@ export function useProductDetail({
             updatedProduct.bidCount += 1;
 
             // 입찰 기록에 새 입찰 추가
+            // 백엔드에서 완전한 ProductBid 객체를 전달받는 것을 권장
+            // 임시 방편으로 timestamp + random으로 충돌 최소화
             if (updatedProduct.productBids) {
+              const tempBid = {
+                productBidId: newBid.productBidId || Date.now() + Math.random(),
+                price: newBid.price,
+                bidTime: newBid.bidTime || new Date().toISOString(),
+                bidderNickname: newBid.bidderNickname || "익명",
+              };
+
               updatedProduct.productBids = [
-                {
-                  productBidId: Date.now(),
-                  price: newBid.price,
-                  bidTime: new Date().toISOString(),
-                  bidderNickname: newBid.bidderNickname || "익명",
-                },
+                tempBid,
                 ...updatedProduct.productBids,
               ];
             }
@@ -167,8 +173,7 @@ export function useProductDetail({
       clientRef.current?.deactivate();
       console.log("WebSocket disconnected");
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [productId, product?.bidStatus, isUsingMockData]);
+  }, [productId, product, isUsingMockData]);
 
   // 경매 마감 여부 확인
   const checkIsAuctionExpired = useCallback(() => {

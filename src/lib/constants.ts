@@ -43,3 +43,9 @@ export const TIME_CONSTANTS = {
   MINUTES_PER_HOUR: 60,
   HOURS_PER_DAY: 24,
 } as const;
+
+/**
+ * API 기본 URL
+ */
+export const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";

@@ -153,12 +153,12 @@ export function getMinBidIncrement(currentPrice: number): number {
 }
 
 /**
- * 상품 상태를 한글 라벨로 변환합니다.
- * @param status - 상품 상태 (GOOD, AVERAGE, BAD)
- * @param statusList - 상태 목록 (PRODUCT_STATUS)
- * @returns 한글 라벨 또는 원래 값
+ * 상태 값을 한글 라벨로 변환합니다.
+ * @param status - 상태 값 (예: GOOD, NOT_BIDDED 등)
+ * @param statusList - 상태 목록 배열
+ * @returns 한글 라벨 또는 원래 값 (찾지 못한 경우)
  */
-export function getProductStatusLabel(
+export function getStatusLabel(
   status: string,
   statusList: Array<{ label: string; value: string }>,
 ): string {
@@ -167,17 +167,23 @@ export function getProductStatusLabel(
 }
 
 /**
- * 입찰 상태를 한글 라벨로 변환합니다.
- * @param status - 입찰 상태 (NOT_BIDDED, BIDDED, PAYMENT_WAITING, COMPLETED)
- * @param statusList - 상태 목록 (BID_STATUS)
- * @returns 한글 라벨 또는 원래 값
+ * @deprecated getStatusLabel을 사용하세요
+ */
+export function getProductStatusLabel(
+  status: string,
+  statusList: Array<{ label: string; value: string }>,
+): string {
+  return getStatusLabel(status, statusList);
+}
+
+/**
+ * @deprecated getStatusLabel을 사용하세요
  */
 export function getBidStatusLabel(
   status: string,
   statusList: Array<{ label: string; value: string }>,
 ): string {
-  const statusItem = statusList.find((item) => item.value === status);
-  return statusItem ? statusItem.label : status;
+  return getStatusLabel(status, statusList);
 }
 
 /**
