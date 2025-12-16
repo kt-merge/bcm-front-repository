@@ -45,7 +45,7 @@ export function useCreateProductForm() {
     category: "",
     startPrice: "0",
     bidEndDate: defaultBidEndDate,
-    productStatus: "GOOD",
+    productStatus: "UNOPENED",
   });
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
@@ -265,6 +265,7 @@ export function useCreateProductForm() {
       const mainImage = imageFiles[mainImageIndex];
       const otherImages = imageFiles.filter((_, idx) => idx !== mainImageIndex);
       const imageUrls = [mainImage, ...otherImages].map((file) => file.name);
+      const thumbnail = mainImage.name;
 
       const productData = {
         name: formData.name,
@@ -274,7 +275,8 @@ export function useCreateProductForm() {
         price: formData.startPrice ? parseInt(formData.startPrice, 10) : 0,
         bidEndDate: bidEndDateString,
         productStatus: formData.productStatus,
-        imageUrls: imageUrls,
+        thumbnail,
+        imageUrls,
       };
 
       const result = await apiPost<{ id: number }>(
