@@ -331,7 +331,7 @@ export default function ProductDetail({
                 alt={product.name}
                 width={600}
                 height={600}
-                quality={100}
+                quality={75}
                 className="h-full w-full object-cover"
               />
 

@@ -277,12 +277,6 @@ export function useCreateProductForm() {
         imageUrls: imageUrls,
       };
 
-      console.log("Product Data:", productData);
-      console.log(
-        "Image Files:",
-        imageFiles.map((f) => f.name),
-      );
-
       const result = await apiPost<{ id: number }>(
         "/api/products",
         productData,
