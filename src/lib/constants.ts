@@ -6,7 +6,7 @@ export const PRODUCT_STATUS = [
   { label: "좋음", value: "GOOD" },
   { label: "보통", value: "AVERAGE" },
   { label: "나쁨", value: "BAD" },
-];
+] as const;
 
 export type ProductStatus = (typeof PRODUCT_STATUS)[number]["value"];
 
