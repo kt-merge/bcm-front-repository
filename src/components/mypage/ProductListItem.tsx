@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { PRODUCT_STATUS } from "@/lib/constants";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, getProductStatusLabel } from "@/lib/utils";
 
 interface ProductListItemProps {
   id: number | string;
@@ -15,12 +15,6 @@ interface ProductListItemProps {
   linkPrefix?: string;
   actionNode?: React.ReactNode;
 }
-
-const getProductStatusLabel = (status?: string) => {
-  if (!status) return "";
-  const item = PRODUCT_STATUS.find((s) => s.value === status.toUpperCase());
-  return item ? item.label : status;
-};
 
 export function ProductListItem({
   id,
@@ -52,7 +46,11 @@ export function ProductListItem({
             )}
           </div>
           <div className="text-muted-foreground mt-1 flex items-center gap-2 text-xs">
-            {status && <span>{getProductStatusLabel(status)}</span>}
+            {status && (
+              <span>
+                {getProductStatusLabel(status.toUpperCase(), PRODUCT_STATUS)}
+              </span>
+            )}
             {status && subText && <span>•</span>}
             {subText && <span>{subText}</span>}
           </div>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Product, ProductListResponse } from "@/types";
+import { API_BASE_URL } from "@/lib/constants";
 import mockData from "@/mocks/products.json";
 
 type SortOption =
@@ -26,7 +27,7 @@ export function useProducts(searchQuery: string = "", pageSize: number = 6) {
       setLoading(true);
       try {
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/products?page=0&size=1000`,
+          `${API_BASE_URL}/api/products?page=0&size=1000`,
         );
 
         if (!res.ok) {
