@@ -44,6 +44,7 @@ interface UseTossPaymentsReturn {
   setAmount: (amount: number) => Promise<void>;
 }
 
+// 토스페이먼츠 클라이언트 키
 const TOSS_CLIENT_KEY =
   process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY ||
   "test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm";

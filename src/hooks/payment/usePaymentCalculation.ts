@@ -1,9 +1,5 @@
 import { useMemo } from "react";
-
-export const PAYMENT_CONSTANTS = {
-  SHIPPING_FEE: 3000,
-  TAX_RATE: 0.1, // 10%
-};
+import { PAYMENT_CONFIG } from "@/lib/constants";
 
 interface UsePaymentCalculationReturn {
   shippingFee: number;
@@ -20,8 +16,8 @@ export function usePaymentCalculation(
   winningBid: number,
 ): UsePaymentCalculationReturn {
   const calculation = useMemo(() => {
-    const shippingFee = PAYMENT_CONSTANTS.SHIPPING_FEE;
-    const tax = Math.floor(winningBid * PAYMENT_CONSTANTS.TAX_RATE);
+    const shippingFee = PAYMENT_CONFIG.SHIPPING_FEE;
+    const tax = Math.floor(winningBid * PAYMENT_CONFIG.TAX_RATE);
     const totalAmount = winningBid + shippingFee + tax;
 
     return {

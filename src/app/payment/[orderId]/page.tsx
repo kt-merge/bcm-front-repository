@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
 import { useAuth } from "@/hooks/user/useAuth";
 import { usePaymentOrder } from "@/hooks/payment/usePaymentOrder";
 import { useTossPayments } from "@/hooks/payment/useTossPayments";
 import { usePaymentCalculation } from "@/hooks/payment/usePaymentCalculation";
+import { normalizeError, formatUserMessage } from "@/lib/errors";
 import ShippingForm from "@/components/payment/ShippingForm";
 import PaymentWidget from "@/components/payment/PaymentWidget";
 import PaymentSummary from "@/components/payment/PaymentSummary";
@@ -19,6 +19,7 @@ export default function CheckoutPage({
   const { user, isLoading: authLoading } = useAuth();
   const [resolvedOrderId, setResolvedOrderId] = useState<number>(0);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [globalError, setGlobalError] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -75,6 +76,28 @@ export default function CheckoutPage({
     setIsOpen(false);
   };
 
+  const validateDeliveryInfo = () => {
+    const newErrors: Record<string, string> = {};
+    const phoneDigits = deliveryInfo.phone.replace(/\D/g, "");
+
+    if (!deliveryInfo.name.trim()) newErrors.name = "이름을 입력해주세요";
+    if (!deliveryInfo.phone.trim()) {
+      newErrors.phone = "전화번호를 입력해주세요";
+    } else if (phoneDigits.length < 10 || phoneDigits.length > 11) {
+      newErrors.phone = "전화번호 형식을 확인해주세요 (숫자 10~11자리)";
+    }
+    if (!deliveryInfo.address.trim()) newErrors.address = "주소를 입력해주세요";
+    if (!deliveryInfo.detailAddress.trim())
+      newErrors.detailAddress = "상세주소를 입력해주세요";
+    if (!deliveryInfo.postalCode.trim()) {
+      newErrors.postalCode = "우편번호를 입력해주세요";
+    } else if (deliveryInfo.postalCode.replace(/\D/g, "").length < 5) {
+      newErrors.postalCode = "우편번호 5자리를 입력해주세요";
+    }
+
+    return newErrors;
+  };
+
   // 배송 정보 입력 핸들러
   const handleDeliveryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -86,23 +109,22 @@ export default function CheckoutPage({
 
   // 주문 완료 핸들러
   const handleCompleteOrder = async () => {
-    // 배송 정보 검증
-    const newErrors: Record<string, string> = {};
-
-    if (!deliveryInfo.name.trim()) newErrors.name = "이름을 입력해주세요";
-    if (!deliveryInfo.phone.trim()) newErrors.phone = "전화번호를 입력해주세요";
-    if (!deliveryInfo.address.trim()) newErrors.address = "주소를 입력해주세요";
-    if (!deliveryInfo.detailAddress.trim())
-      newErrors.detailAddress = "상세주소를 입력해주세요";
-    if (!deliveryInfo.postalCode.trim())
-      newErrors.postalCode = "우편번호를 입력해주세요";
-
+    const newErrors = validateDeliveryInfo();
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
+      setGlobalError("입력값을 다시 확인해 주세요.");
+      return;
+    }
+
+    if (!widgetReady) {
+      setGlobalError(
+        "결제 위젯이 준비되지 않았습니다. 잠시 후 다시 시도해 주세요.",
+      );
       return;
     }
 
     setIsProcessing(true);
+    setGlobalError(null);
 
     try {
       // 배송 정보 업데이트
@@ -119,8 +141,9 @@ export default function CheckoutPage({
         customerMobilePhone: deliveryInfo.phone.replace(/-/g, ""),
       });
     } catch (error) {
+      const appError = normalizeError(error);
       console.error("주문 처리 실패:", error);
-      alert("결제 요청에 실패했습니다.");
+      setGlobalError(formatUserMessage(appError));
     } finally {
       setIsProcessing(false);
     }
@@ -129,6 +152,11 @@ export default function CheckoutPage({
   return (
     <main className="bg-background min-h-screen py-6 sm:py-8 md:py-12">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        {globalError && (
+          <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {globalError}
+          </div>
+        )}
         <h1 className="text-foreground mb-8 text-2xl font-bold sm:mb-10 sm:text-3xl md:mb-12 md:text-4xl">
           주문 결제
         </h1>
