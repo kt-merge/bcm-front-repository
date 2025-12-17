@@ -66,3 +66,12 @@ export const TIME_CONSTANTS = {
  */
 export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+
+/**
+ * 결제 관련 설정
+ */
+export const PAYMENT_CONFIG = {
+  SHIPPING_FEE: 3000, // 배송료 (원)
+  TAX_RATE: 0.1, // 세금률 (10%)
+  ESTIMATED_DELIVERY: "3-5 영업일", // 예상 배송 기간
+} as const;
