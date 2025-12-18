@@ -1,11 +1,13 @@
 "use client";
 
-import { Suspense, useMemo, useCallback } from "react";
+import { Suspense, useMemo, useCallback, useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useProducts } from "@/hooks/useProducts";
+import { useInfiniteProducts } from "@/hooks/useInfiniteProducts";
 import HeroSection from "@/components/home/HeroSection";
 import ProductsHeader from "@/components/home/ProductsHeader";
 import ProductsGrid from "@/components/home/ProductsGrid";
+import InfiniteProductsGrid from "@/components/home/InfiniteProductsGrid";
 import Pagination from "@/components/home/Pagination";
 import ProductCardSkeleton from "@/components/product/ProductCardSkeleton";
 
@@ -19,15 +21,40 @@ function HomeContent() {
     return Number.isNaN(n) ? 0 : Math.max(n, 0);
   }, [searchParams]);
 
-  const {
-    products,
-    loading,
-    sortBy,
-    setSortBy,
-    currentPage,
-    totalPages,
-    totalItems,
-  } = useProducts(searchQuery, 6, pageParam);
+  // 모바일 여부 감지
+  const [isMobile, setIsMobile] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  // 데스크톱: 페이지네이션
+  const paginatedData = useProducts(searchQuery, 6, pageParam);
+
+  // 모바일: 무한 스크롤
+  const infiniteData = useInfiniteProducts(searchQuery, 6);
+
+  // 현재 모드에 따라 데이터 선택
+  const { products, loading, sortBy, setSortBy, totalItems } = isMobile
+    ? {
+        products: infiniteData.products,
+        loading: infiniteData.loading,
+        sortBy: infiniteData.sortBy,
+        setSortBy: infiniteData.setSortBy,
+        totalItems: infiniteData.totalItems,
+      }
+    : {
+        products: paginatedData.products,
+        loading: paginatedData.loading,
+        sortBy: paginatedData.sortBy,
+        setSortBy: paginatedData.setSortBy,
+        totalItems: paginatedData.totalItems,
+      };
 
   // 페이지 변경 시 URL 업데이트 (currentPage는 URL 변경 감지로 자동 동기화)
   const handlePageChange = useCallback(
@@ -53,18 +80,37 @@ function HomeContent() {
             onSortChange={setSortBy}
           />
 
-          <ProductsGrid
-            products={products}
-            loading={loading}
-            searchQuery={searchQuery}
-            currentPage={currentPage}
-          />
+          {isMobile === null ? (
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <ProductCardSkeleton key={index} />
+              ))}
+            </div>
+          ) : isMobile ? (
+            <InfiniteProductsGrid
+              products={infiniteData.products}
+              loading={infiniteData.loading}
+              searchQuery={searchQuery}
+              lastProductRef={infiniteData.lastProductRef}
+              hasMore={infiniteData.hasMore}
+              pageSize={6}
+            />
+          ) : (
+            <>
+              <ProductsGrid
+                products={paginatedData.products}
+                loading={paginatedData.loading}
+                searchQuery={searchQuery}
+                currentPage={paginatedData.currentPage}
+              />
 
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-          />
+              <Pagination
+                currentPage={paginatedData.currentPage}
+                totalPages={paginatedData.totalPages}
+                onPageChange={handlePageChange}
+              />
+            </>
+          )}
         </div>
       </section>
     </main>

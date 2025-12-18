@@ -1,0 +1,124 @@
+"use client";
+
+import { useState, useEffect, useCallback, useRef } from "react";
+import { Product, ProductListResponse } from "@/types";
+import { apiGet } from "@/lib/api";
+import mockData from "@/mocks/products.json";
+
+type SortOption =
+  | "latest"
+  | "price-high"
+  | "price-low"
+  | "bid-count"
+  | "ending-soon";
+
+const SORT_MAP: Record<SortOption, string> = {
+  latest: "createdAt,desc",
+  "ending-soon": "bidEndDate,asc",
+  "price-high": "bidPrice,desc",
+  "price-low": "bidPrice,asc",
+  "bid-count": "bidCount,desc",
+};
+
+export function useInfiniteProducts(
+  searchQuery: string = "",
+  pageSize: number = 6,
+) {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [sortBy, setSortBy] = useState<SortOption>("latest");
+  const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [totalItems, setTotalItems] = useState(0);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+
+  // 검색어나 정렬 변경 시 리셋
+  useEffect(() => {
+    setProducts([]);
+    setCurrentPage(0);
+    setHasMore(true);
+  }, [searchQuery, sortBy]);
+
+  // 데이터 로드
+  useEffect(() => {
+    let ignore = false;
+
+    const loadMore = async () => {
+      if (loading) return;
+
+      setLoading(true);
+      try {
+        const params = new URLSearchParams();
+        if (searchQuery.trim()) params.set("name", searchQuery.trim());
+        params.set("page", String(currentPage));
+        params.set("size", String(pageSize));
+        params.set("sort", SORT_MAP[sortBy]);
+
+        const data = await apiGet<ProductListResponse>(
+          `/api/products?${params.toString()}`,
+        );
+
+        if (ignore) return;
+
+        const newProducts = data.content ?? [];
+        setProducts((prev) => [...prev, ...newProducts]);
+        setTotalItems(data.totalElements ?? 0);
+        setHasMore(currentPage + 1 < (data.totalPages ?? 0));
+      } catch (error) {
+        if (ignore) return;
+
+        console.error("제품 목록 조회 실패, 목데이터 사용:", error);
+        const all = (mockData as Product[]) ?? [];
+        const startIdx = currentPage * pageSize;
+        const endIdx = startIdx + pageSize;
+        const newProducts = all.slice(startIdx, endIdx);
+        setProducts((prev) => [...prev, ...newProducts]);
+        setTotalItems(all.length);
+        setHasMore(endIdx < all.length);
+      } finally {
+        if (!ignore) setLoading(false);
+      }
+    };
+
+    loadMore();
+
+    return () => {
+      ignore = true;
+    };
+  }, [currentPage, pageSize, sortBy, searchQuery]);
+
+  // Intersection Observer 콜백
+  const lastProductRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (observerRef.current) observerRef.current.disconnect();
+
+      observerRef.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasMore && !loading) {
+          setCurrentPage((prev) => prev + 1);
+        }
+      });
+
+      if (node) observerRef.current.observe(node);
+    },
+    [loading, hasMore],
+  );
+
+  // 언마운트 시 IntersectionObserver 정리
+  useEffect(() => {
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, []);
+
+  return {
+    products,
+    loading,
+    sortBy,
+    setSortBy,
+    hasMore,
+    totalItems,
+    lastProductRef,
+  };
+}
