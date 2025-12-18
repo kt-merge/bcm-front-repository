@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect } from "react";
+import { Suspense, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { useProducts } from "@/hooks/useProducts";
 import HeroSection from "@/components/home/HeroSection";
@@ -12,11 +12,11 @@ import ProductCardSkeleton from "@/components/product/ProductCardSkeleton";
 function HomeContent() {
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get("search") || "";
-  const pageParam = (() => {
+  const pageParam = useMemo(() => {
     const raw = searchParams.get("page");
     const n = raw ? parseInt(raw, 10) : 0;
     return Number.isNaN(n) ? 0 : Math.max(n, 0);
-  })();
+  }, [searchParams]);
 
   const {
     products,
@@ -27,15 +27,7 @@ function HomeContent() {
     setCurrentPage,
     totalPages,
     totalItems,
-  } = useProducts(searchQuery, 6);
-
-  // URL의 page 파라미터로 초기 페이지 반영 (0-base 기대)
-  useEffect(() => {
-    if (pageParam !== currentPage) {
-      setCurrentPage(pageParam);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pageParam]);
+  } = useProducts(searchQuery, 6, pageParam);
 
   return (
     <main className="bg-background min-h-screen">
