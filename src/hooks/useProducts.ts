@@ -36,6 +36,13 @@ export function useProducts(
   const [totalPages, setTotalPages] = useState(0);
   const [totalItems, setTotalItems] = useState(0);
 
+  // URL 페이지 파라미터 변경 시 currentPage 동기화
+  useEffect(() => {
+    if (initialPage >= 0 && initialPage !== currentPage) {
+      setCurrentPage(initialPage);
+    }
+  }, [initialPage, currentPage]);
+
   // 검색어 변경 시 페이지 리셋
   useEffect(() => {
     setCurrentPage(0);
