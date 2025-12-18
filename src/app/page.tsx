@@ -22,7 +22,7 @@ function HomeContent() {
   }, [searchParams]);
 
   // 모바일 여부 감지
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState<boolean | null>(null);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -37,7 +37,7 @@ function HomeContent() {
   const paginatedData = useProducts(searchQuery, 6, pageParam);
 
   // 모바일: 무한 스크롤
-  const infiniteData = useInfiniteProducts(searchQuery, 3);
+  const infiniteData = useInfiniteProducts(searchQuery, 6);
 
   // 현재 모드에 따라 데이터 선택
   const { products, loading, sortBy, setSortBy, totalItems } = isMobile
@@ -80,13 +80,20 @@ function HomeContent() {
             onSortChange={setSortBy}
           />
 
-          {isMobile ? (
+          {isMobile === null ? (
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <ProductCardSkeleton key={index} />
+              ))}
+            </div>
+          ) : isMobile ? (
             <InfiniteProductsGrid
               products={infiniteData.products}
               loading={infiniteData.loading}
               searchQuery={searchQuery}
               lastProductRef={infiniteData.lastProductRef}
               hasMore={infiniteData.hasMore}
+              pageSize={6}
             />
           ) : (
             <>

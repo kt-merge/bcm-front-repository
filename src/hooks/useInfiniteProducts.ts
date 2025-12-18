@@ -90,7 +90,6 @@ export function useInfiniteProducts(
   // Intersection Observer 콜백
   const lastProductRef = useCallback(
     (node: HTMLDivElement | null) => {
-      if (loading) return;
       if (observerRef.current) observerRef.current.disconnect();
 
       observerRef.current = new IntersectionObserver((entries) => {
@@ -103,6 +102,15 @@ export function useInfiniteProducts(
     },
     [loading, hasMore],
   );
+
+  // 언마운트 시 IntersectionObserver 정리
+  useEffect(() => {
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, []);
 
   return {
     products,

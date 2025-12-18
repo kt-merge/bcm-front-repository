@@ -8,6 +8,7 @@ interface InfiniteProductsGridProps {
   searchQuery: string;
   lastProductRef: (node: HTMLDivElement | null) => void;
   hasMore: boolean;
+  pageSize?: number;
 }
 
 export default function InfiniteProductsGrid({
@@ -16,6 +17,7 @@ export default function InfiniteProductsGrid({
   searchQuery,
   lastProductRef,
   hasMore,
+  pageSize = 6,
 }: InfiniteProductsGridProps) {
   if (products.length === 0 && !loading) {
     return (
@@ -29,22 +31,18 @@ export default function InfiniteProductsGrid({
 
   return (
     <div className="grid grid-cols-1 gap-6">
-      {products.map((product, index) => {
-        if (index === products.length - 1) {
-          return (
-            <div key={product.id} ref={lastProductRef}>
-              <ProductCard product={product} currentPage={0} />
-            </div>
-          );
-        }
-        return (
-          <ProductCard key={product.id} product={product} currentPage={0} />
-        );
-      })}
+      {products.map((product, index) => (
+        <div
+          key={product.id}
+          ref={index === products.length - 1 ? lastProductRef : null}
+        >
+          <ProductCard product={product} currentPage={0} />
+        </div>
+      ))}
 
       {loading && (
         <>
-          {Array.from({ length: 3 }).map((_, index) => (
+          {Array.from({ length: pageSize }).map((_, index) => (
             <ProductCardSkeleton key={`skeleton-${index}`} />
           ))}
         </>
