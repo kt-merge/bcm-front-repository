@@ -1,7 +1,7 @@
 "use client";
 
-import { Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { Suspense, useMemo, useCallback } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useProducts } from "@/hooks/useProducts";
 import HeroSection from "@/components/home/HeroSection";
 import ProductsHeader from "@/components/home/ProductsHeader";
@@ -10,8 +10,14 @@ import Pagination from "@/components/home/Pagination";
 import ProductCardSkeleton from "@/components/product/ProductCardSkeleton";
 
 function HomeContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get("search") || "";
+  const pageParam = useMemo(() => {
+    const raw = searchParams.get("page");
+    const n = raw ? parseInt(raw, 10) : 0;
+    return Number.isNaN(n) ? 0 : Math.max(n, 0);
+  }, [searchParams]);
 
   const {
     products,
@@ -19,10 +25,19 @@ function HomeContent() {
     sortBy,
     setSortBy,
     currentPage,
-    setCurrentPage,
     totalPages,
     totalItems,
-  } = useProducts(searchQuery, 6);
+  } = useProducts(searchQuery, 6, pageParam);
+
+  // 페이지 변경 시 URL 업데이트 (currentPage는 URL 변경 감지로 자동 동기화)
+  const handlePageChange = useCallback(
+    (page: number) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("page", String(page));
+      router.push(`/?${params.toString()}`);
+    },
+    [searchParams, router],
+  );
 
   return (
     <main className="bg-background min-h-screen">
@@ -48,7 +63,7 @@ function HomeContent() {
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
-            onPageChange={setCurrentPage}
+            onPageChange={handlePageChange}
           />
         </div>
       </section>

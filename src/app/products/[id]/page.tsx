@@ -77,13 +77,6 @@ export default function ProductDetail({
   return (
     <main className="bg-background min-h-screen py-6 sm:py-8 md:py-12">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <Link
-          href={`/?page=${page}`}
-          className="text-muted-foreground hover:text-foreground mb-6 inline-flex items-center gap-2 text-sm transition-colors sm:mb-8"
-        >
-          ← 홈으로 돌아가기
-        </Link>
-
         <div className="grid grid-cols-1 gap-6 sm:gap-8 md:gap-10 lg:grid-cols-3 lg:gap-12">
           {/* Product Image Gallery */}
           <div className="lg:col-span-2">
