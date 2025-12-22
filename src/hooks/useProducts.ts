@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Product, ProductListResponse } from "@/types";
 import { apiGet } from "@/lib/api";
+import { USE_MOCK_WHEN_EMPTY } from "@/lib/constants";
 import mockData from "@/mocks/products.json";
 
 type SortOption =
@@ -70,9 +71,24 @@ export function useProducts(
         );
 
         if (ignore) return;
-        setProducts(data.content ?? []);
+
+        const total = data.totalElements ?? 0;
+        const list = data.content ?? [];
+
+        // 서버가 정상 응답했지만 결과가 비어있을 때, (검색어가 없고) 설정에 따라 목데이터 사용
+        if (!searchQuery.trim() && total === 0 && USE_MOCK_WHEN_EMPTY) {
+          const all = (mockData as Product[]) ?? [];
+          const startIdx = currentPage * pageSize;
+          const endIdx = startIdx + pageSize;
+          setProducts(all.slice(startIdx, endIdx));
+          setTotalPages(Math.ceil(all.length / pageSize));
+          setTotalItems(all.length);
+          return;
+        }
+
+        setProducts(list);
         setTotalPages(data.totalPages ?? 0);
-        setTotalItems(data.totalElements ?? 0);
+        setTotalItems(total);
       } catch (error) {
         console.error("제품 목록 조회 실패, 목데이터 사용:", error);
         // API 실패 시 목데이터 기준으로 페이징

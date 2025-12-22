@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Product, ProductListResponse } from "@/types";
 import { apiGet } from "@/lib/api";
+import { USE_MOCK_WHEN_EMPTY } from "@/lib/constants";
 import mockData from "@/mocks/products.json";
 
 type SortOption =
@@ -60,9 +61,25 @@ export function useInfiniteProducts(
 
         if (ignore) return;
 
+        const total = data.totalElements ?? 0;
         const newProducts = data.content ?? [];
+
+        // 서버가 정상 응답했지만 결과가 비어있을 때, (검색어가 없고) 설정에 따라 목데이터 사용
+        if (!searchQuery.trim() && total === 0 && USE_MOCK_WHEN_EMPTY) {
+          const all = (mockData as Product[]) ?? [];
+          const startIdx = currentPage * pageSize;
+          const endIdx = startIdx + pageSize;
+          const fallback = all.slice(startIdx, endIdx);
+          setProducts((prev) =>
+            currentPage === 0 ? fallback : [...prev, ...fallback],
+          );
+          setTotalItems(all.length);
+          setHasMore(endIdx < all.length);
+          return;
+        }
+
         setProducts((prev) => [...prev, ...newProducts]);
-        setTotalItems(data.totalElements ?? 0);
+        setTotalItems(total);
         setHasMore(currentPage + 1 < (data.totalPages ?? 0));
       } catch (error) {
         if (ignore) return;
