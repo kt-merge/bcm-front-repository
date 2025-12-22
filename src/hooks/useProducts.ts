@@ -55,6 +55,17 @@ export function useProducts(
     if (currentPage < 0) return;
 
     let ignore = false;
+
+    // Mock 데이터 폴백 로직
+    const applyMockDataFallback = (pageNum: number) => {
+      const all = (mockData as Product[]) ?? [];
+      const startIdx = pageNum * pageSize;
+      const endIdx = startIdx + pageSize;
+      setProducts(all.slice(startIdx, endIdx));
+      setTotalPages(Math.ceil(all.length / pageSize));
+      setTotalItems(all.length);
+    };
+
     const fetchPage = async () => {
       setLoading(true);
       try {
@@ -77,12 +88,7 @@ export function useProducts(
 
         // 서버가 정상 응답했지만 결과가 비어있을 때, (검색어가 없고) 설정에 따라 목데이터 사용
         if (!searchQuery.trim() && total === 0 && USE_MOCK_WHEN_EMPTY) {
-          const all = (mockData as Product[]) ?? [];
-          const startIdx = currentPage * pageSize;
-          const endIdx = startIdx + pageSize;
-          setProducts(all.slice(startIdx, endIdx));
-          setTotalPages(Math.ceil(all.length / pageSize));
-          setTotalItems(all.length);
+          applyMockDataFallback(currentPage);
           return;
         }
 
@@ -91,13 +97,7 @@ export function useProducts(
         setTotalItems(total);
       } catch (error) {
         console.error("제품 목록 조회 실패, 목데이터 사용:", error);
-        // API 실패 시 목데이터 기준으로 페이징
-        const all = (mockData as Product[]) ?? [];
-        const startIdx = currentPage * pageSize;
-        const endIdx = startIdx + pageSize;
-        setProducts(all.slice(startIdx, endIdx));
-        setTotalPages(Math.ceil(all.length / pageSize));
-        setTotalItems(all.length);
+        applyMockDataFallback(currentPage);
       } finally {
         if (!ignore) setLoading(false);
       }

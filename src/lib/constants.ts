@@ -72,12 +72,16 @@ export const API_BASE_URL =
  * - 기본값: 개발 환경에서는 사용(true), 프로덕션에서는 사용 안 함(false)
  * - 환경변수로 강제 설정 가능: NEXT_PUBLIC_USE_MOCK_WHEN_EMPTY
  */
-export const USE_MOCK_WHEN_EMPTY =
-  (process.env.NEXT_PUBLIC_USE_MOCK_WHEN_EMPTY ?? "") === "true"
-    ? true
-    : (process.env.NEXT_PUBLIC_USE_MOCK_WHEN_EMPTY ?? "") === "false"
-      ? false
-      : process.env.NODE_ENV !== "production";
+export const USE_MOCK_WHEN_EMPTY = (() => {
+  const envValue = process.env.NEXT_PUBLIC_USE_MOCK_WHEN_EMPTY ?? "";
+
+  // 명시적으로 설정된 경우
+  if (envValue === "true") return true;
+  if (envValue === "false") return false;
+
+  // 기본값: 프로덕션이 아닐 때만 사용
+  return process.env.NODE_ENV !== "production";
+})();
 
 /**
  * 결제 관련 설정
