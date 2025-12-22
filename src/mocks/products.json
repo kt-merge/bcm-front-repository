@@ -15,6 +15,7 @@
     "bidCount": 12,
     "bidStatus": "BIDDED",
     "productStatus": "GOOD",
+    "thumbnail": "/product01.jpeg",
     "imageUrls": [
       {
         "id": 1,
