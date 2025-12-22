@@ -23,6 +23,7 @@ export interface Product {
   bidCount: number;
   bidStatus: BidStatus;
   productStatus: ProductStatus;
+  thumbnail: string;
   imageUrls: ProductImage[];
   user: {
     id: number;
