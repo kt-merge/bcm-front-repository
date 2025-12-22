@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Product, ProductListResponse } from "@/types";
 import { apiGet } from "@/lib/api";
+import { USE_MOCK_WHEN_EMPTY } from "@/lib/constants";
 import mockData from "@/mocks/products.json";
 
 type SortOption =
@@ -43,6 +44,21 @@ export function useInfiniteProducts(
   useEffect(() => {
     let ignore = false;
 
+    // Mock 데이터 폴백 로직
+    const applyMockDataFallback = (currentPageNum: number) => {
+      const all = (mockData as Product[]) ?? [];
+      const startIdx = currentPageNum * pageSize;
+      const endIdx = startIdx + pageSize;
+      const fallbackProducts = all.slice(startIdx, endIdx);
+      setProducts((prev) =>
+        currentPageNum === 0
+          ? fallbackProducts
+          : [...prev, ...fallbackProducts],
+      );
+      setTotalItems(all.length);
+      setHasMore(endIdx < all.length);
+    };
+
     const loadMore = async () => {
       if (loading) return;
 
@@ -60,21 +76,23 @@ export function useInfiniteProducts(
 
         if (ignore) return;
 
+        const total = data.totalElements ?? 0;
         const newProducts = data.content ?? [];
+
+        // 서버가 정상 응답했지만 결과가 비어있을 때, (검색어가 없고) 설정에 따라 목데이터 사용
+        if (!searchQuery.trim() && total === 0 && USE_MOCK_WHEN_EMPTY) {
+          applyMockDataFallback(currentPage);
+          return;
+        }
+
         setProducts((prev) => [...prev, ...newProducts]);
-        setTotalItems(data.totalElements ?? 0);
+        setTotalItems(total);
         setHasMore(currentPage + 1 < (data.totalPages ?? 0));
       } catch (error) {
         if (ignore) return;
 
         console.error("제품 목록 조회 실패, 목데이터 사용:", error);
-        const all = (mockData as Product[]) ?? [];
-        const startIdx = currentPage * pageSize;
-        const endIdx = startIdx + pageSize;
-        const newProducts = all.slice(startIdx, endIdx);
-        setProducts((prev) => [...prev, ...newProducts]);
-        setTotalItems(all.length);
-        setHasMore(endIdx < all.length);
+        applyMockDataFallback(currentPage);
       } finally {
         if (!ignore) setLoading(false);
       }
