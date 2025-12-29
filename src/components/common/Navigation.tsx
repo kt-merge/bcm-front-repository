@@ -50,7 +50,7 @@ export default function Navigation() {
                   <HeaderSearch />
                   <Link
                     href="/mypage"
-                    className="shrink-0 text-muted-foreground hover:text-foreground hover:bg-muted rounded-full p-2 transition-colors"
+                    className="text-muted-foreground hover:text-foreground hover:bg-muted shrink-0 rounded-full p-2 transition-colors"
                     title="마이페이지"
                   >
                     <svg
@@ -69,7 +69,7 @@ export default function Navigation() {
                   </Link>
                   <button
                     onClick={handleLogout}
-                    className="shrink-0 text-muted-foreground hover:text-foreground hover:bg-muted rounded-full p-2 transition-colors"
+                    className="text-muted-foreground hover:text-foreground hover:bg-muted shrink-0 rounded-full p-2 transition-colors"
                     title="로그아웃"
                   >
                     <LogOut className="h-5 w-5" />
@@ -81,7 +81,7 @@ export default function Navigation() {
                   <HeaderSearch />
                   <Link
                     href="/login"
-                    className="shrink-0 text-muted-foreground hover:text-foreground hover:bg-muted rounded-full p-2 transition-colors"
+                    className="text-muted-foreground hover:text-foreground hover:bg-muted shrink-0 rounded-full p-2 transition-colors"
                     title="로그인"
                   >
                     <User className="h-5 w-5" />
