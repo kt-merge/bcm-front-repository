@@ -183,7 +183,7 @@ export async function apiFetch<T = unknown>(
       return {} as T;
     }
 
-    return await response.json();
+    return await response.json().catch(() => ({}));
   } catch (error) {
     console.error("API 요청 오류:", error);
     throw error;

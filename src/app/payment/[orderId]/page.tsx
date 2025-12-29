@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/user/useAuth";
 import { usePaymentOrder } from "@/hooks/payment/usePaymentOrder";
 import { useTossPayments } from "@/hooks/payment/useTossPayments";
-import { usePaymentCalculation } from "@/hooks/payment/usePaymentCalculation";
 import { normalizeError, formatUserMessage } from "@/lib/errors";
 import ShippingForm from "@/components/payment/ShippingForm";
 import PaymentWidget from "@/components/payment/PaymentWidget";
@@ -43,16 +42,16 @@ export default function CheckoutPage({
     updateShippingInfo,
   } = usePaymentOrder(resolvedOrderId, authLoading, user);
 
-  // 결제 금액 계산
-  const { shippingFee, tax, totalAmount } = usePaymentCalculation(
-    winningProduct.winningBid,
-  );
+  // // 결제 금액 계산
+  // const { shippingFee, tax, totalAmount } = usePaymentCalculation(
+  //   winningProduct.winningBid,
+  // );
 
   // 토스페이먼츠 위젯 관리
   // isLoading이 false이고 orderId가 있을 때만 초기화
   const { widgetReady, requestPayment } = useTossPayments(
     orderId,
-    totalAmount,
+    winningProduct.winningBid,
     !isLoading && orderId > 0,
   );
 
@@ -134,7 +133,7 @@ export default function CheckoutPage({
       await requestPayment({
         orderId: winningProduct.orderNumber,
         orderName: winningProduct.title,
-        successUrl: `${window.location.origin}/payment/success?myOrderId=${orderId}&amount=${totalAmount}`,
+        successUrl: `${window.location.origin}/payment/success?myOrderId=${orderId}&amount=${winningProduct.winningBid}`,
         failUrl: `${window.location.origin}/payment/fail?myOrderId=${orderId}`,
         customerEmail: "customer@example.com",
         customerName: deliveryInfo.name,
@@ -187,9 +186,7 @@ export default function CheckoutPage({
             {/* Order Summary Sidebar */}
             <PaymentSummary
               winningProduct={winningProduct}
-              shippingFee={shippingFee}
-              tax={tax}
-              totalAmount={totalAmount}
+              totalAmount={winningProduct.winningBid}
             />
           </div>
         )}

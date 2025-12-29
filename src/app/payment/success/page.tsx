@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Check } from "lucide-react";
-import { apiGet } from "@/lib/api";
+import { apiGet, apiPost } from "@/lib/api";
 import { formatCurrency } from "@/lib/utils";
 import { useAuth } from "@/hooks/user/useAuth";
 import type { OrderDetail } from "@/types";
@@ -48,20 +48,14 @@ function SuccessContent() {
       }
 
       try {
-        await fetch(`/api/payments/TOSS`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-          body: JSON.stringify({
-            paymentKey,
-            orderId: tossOrderId,
-            amount: Number(amount),
-          }),
-        });
         const data = await apiGet<OrderDetail>(`/api/orders/${orderId}`);
         setOrderData(data);
+
+        await apiPost(`/api/payments/TOSS`, {
+          paymentKey,
+          orderId: tossOrderId,
+          amount: Number(amount),
+        });
       } catch (error) {
         console.error("주문 정보 조회 실패:", error);
         // 권한 없음 또는 존재하지 않는 주문일 경우
@@ -82,7 +76,7 @@ function SuccessContent() {
     };
 
     fetchOrderData();
-  }, [orderId, authLoading, user, router, paymentKey]);
+  }, [orderId, authLoading, user, router, paymentKey, amount, tossOrderId]);
 
   const orderDate = new Date().toLocaleDateString("ko-KR");
 

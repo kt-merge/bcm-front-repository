@@ -5,15 +5,15 @@ import type { WinningProduct } from "@/hooks/payment/usePaymentOrder";
 
 interface PaymentSummaryProps {
   winningProduct: WinningProduct;
-  shippingFee: number;
-  tax: number;
+  // shippingFee: number;
+  // tax: number;
   totalAmount: number;
 }
 
 export default function PaymentSummary({
   winningProduct,
-  shippingFee,
-  tax,
+  // shippingFee,
+  // tax,
   totalAmount,
 }: PaymentSummaryProps) {
   return (
