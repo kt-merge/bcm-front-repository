@@ -182,19 +182,12 @@ export default function HeaderSearch() {
                     key={r + i}
                     role="button"
                     tabIndex={0}
-                    onClick={() => {
-                      // 즉시 검색
-                      router.push(`/?search=${encodeURIComponent(r)}`);
-                      addRecent(r);
-                      setOpen(false);
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        router.push(`/?search=${encodeURIComponent(r)}`);
-                        addRecent(r);
-                        setOpen(false);
-                      }
-                    }}
+onClick={() => handleRecentSelect(r)}
+onKeyDown={(e) => {
+  if (e.key === "Enter") {
+    handleRecentSelect(r);
+  }
+}}
                     className="hover:bg-muted/5 flex w-full items-center justify-between px-3 py-2 text-left"
                   >
                     <span className="truncate text-sm">{r}</span>
