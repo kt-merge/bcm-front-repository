@@ -11,7 +11,8 @@ type SortOption =
   | "price-high"
   | "price-low"
   | "bid-count"
-  | "ending-soon";
+  | "ending-soon"
+  | "ended";
 
 const SORT_MAP: Record<SortOption, string> = {
   latest: "createdAt,desc",
@@ -19,6 +20,7 @@ const SORT_MAP: Record<SortOption, string> = {
   "price-high": "bidPrice,desc",
   "price-low": "bidPrice,asc",
   "bid-count": "bidCount,desc",
+  ended: "bidEndDate,desc",
 };
 
 export function useInfiniteProducts(
@@ -69,6 +71,9 @@ export function useInfiniteProducts(
         params.set("page", String(currentPage));
         params.set("size", String(pageSize));
         params.set("sort", SORT_MAP[sortBy]);
+        if (sortBy === "ended") {
+          params.set("bidStatus", "COMPLETED");
+        }
 
         const data = await apiGet<ProductListResponse>(
           `/api/products?${params.toString()}`,
