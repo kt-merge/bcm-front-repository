@@ -42,21 +42,11 @@ export default function PaymentSummary({
         {/* 가격 정보 */}
         <div className="border-border space-y-2 border-b pb-3 sm:space-y-3 sm:pb-4">
           <div className="flex justify-between text-xs sm:text-sm">
-            <span className="text-muted-foreground">낙찰가</span>
+            <span className="text-muted-foreground">
+              낙찰가 + 배송료 및 수수료
+            </span>
             <span className="text-foreground font-medium">
               {formatCurrency(winningProduct.winningBid)}
-            </span>
-          </div>
-          <div className="flex justify-between text-xs sm:text-sm">
-            <span className="text-muted-foreground">배송료</span>
-            <span className="text-foreground font-medium">
-              {formatCurrency(shippingFee)}
-            </span>
-          </div>
-          <div className="flex justify-between text-xs sm:text-sm">
-            <span className="text-muted-foreground">수수료</span>
-            <span className="text-foreground font-medium">
-              {formatCurrency(tax)}
             </span>
           </div>
         </div>

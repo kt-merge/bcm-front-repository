@@ -18,7 +18,7 @@ export function usePaymentCalculation(
   const calculation = useMemo(() => {
     const shippingFee = PAYMENT_CONFIG.SHIPPING_FEE;
     const tax = Math.floor(winningBid * PAYMENT_CONFIG.TAX_RATE);
-    const totalAmount = winningBid + shippingFee + tax;
+    const totalAmount = winningBid;
 
     return {
       shippingFee,

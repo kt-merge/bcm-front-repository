@@ -6,6 +6,7 @@ import type { OrderDetail, UpdateShippingInfoRequest, User } from "@/types";
 export interface WinningProduct {
   id: number;
   title: string;
+  orderNumber: string;
   image: string;
   winningBid: number;
   seller: string;
@@ -44,6 +45,7 @@ export function usePaymentOrder(
   const [winningProduct, setWinningProduct] = useState<WinningProduct>({
     id: 0,
     title: "",
+    orderNumber: "",
     image: "",
     winningBid: 0,
     seller: "",
@@ -80,6 +82,7 @@ export function usePaymentOrder(
         setWinningProduct({
           id: orderData.product.id,
           title: orderData.product.name,
+          orderNumber: orderData.orderNumber,
           image: orderData.product.imageUrls[0]?.imageUrl || "",
           winningBid: orderData.bidPrice,
           seller: orderData.product.user.nickname,

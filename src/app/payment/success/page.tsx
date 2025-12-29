@@ -48,16 +48,30 @@ function SuccessContent() {
       }
 
       try {
+        await fetch(`/api/payments/TOSS`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+          body: JSON.stringify({
+            paymentKey,
+            orderId: tossOrderId,
+            amount: Number(amount),
+          }),
+        });
         const data = await apiGet<OrderDetail>(`/api/orders/${orderId}`);
         setOrderData(data);
       } catch (error) {
         console.error("주문 정보 조회 실패:", error);
         // 권한 없음 또는 존재하지 않는 주문일 경우
-        if (error instanceof Error && 
-            (error.message.includes("403") || 
-             error.message.includes("404") ||
-             error.message.includes("권한") ||
-             error.message.includes("엔티티를 찾을 수 없습니다"))) {
+        if (
+          error instanceof Error &&
+          (error.message.includes("403") ||
+            error.message.includes("404") ||
+            error.message.includes("권한") ||
+            error.message.includes("엔티티를 찾을 수 없습니다"))
+        ) {
           alert("접근 권한이 없거나 존재하지 않는 주문입니다.");
           router.push("/");
           return;
@@ -95,19 +109,19 @@ function SuccessContent() {
           {loading ? (
             <div className="bg-muted space-y-4 rounded-lg p-6">
               <div className="space-y-4">
-                <div className="flex items-center justify-between border-b border-border pb-4">
+                <div className="border-border flex items-center justify-between border-b pb-4">
                   <Skeleton className="h-4 w-20" />
                   <Skeleton className="h-5 w-32" />
                 </div>
-                <div className="flex items-center justify-between border-b border-border pb-4">
+                <div className="border-border flex items-center justify-between border-b pb-4">
                   <Skeleton className="h-4 w-16" />
                   <Skeleton className="h-5 w-48" />
                 </div>
-                <div className="flex items-center justify-between border-b border-border pb-4">
+                <div className="border-border flex items-center justify-between border-b pb-4">
                   <Skeleton className="h-4 w-20" />
                   <Skeleton className="h-5 w-32" />
                 </div>
-                <div className="flex items-center justify-between border-b border-border pb-4">
+                <div className="border-border flex items-center justify-between border-b pb-4">
                   <Skeleton className="h-4 w-20" />
                   <Skeleton className="h-6 w-40" />
                 </div>
@@ -140,7 +154,9 @@ function SuccessContent() {
               <div className="border-border flex items-center justify-between border-b pb-4">
                 <span className="text-muted-foreground">결제금액</span>
                 <span className="text-foreground text-lg font-semibold">
-                  {amount ? formatCurrency(Number(amount)) : formatCurrency(orderData.bidPrice)}
+                  {amount
+                    ? formatCurrency(Number(amount))
+                    : formatCurrency(orderData.bidPrice)}
                 </span>
               </div>
               <div className="flex items-center justify-between">

@@ -132,7 +132,7 @@ export default function CheckoutPage({
 
       // 토스페이먼츠 결제 요청
       await requestPayment({
-        orderId: `ORDER_${orderId}_${Date.now()}`,
+        orderId: winningProduct.orderNumber,
         orderName: winningProduct.title,
         successUrl: `${window.location.origin}/payment/success?myOrderId=${orderId}&amount=${totalAmount}`,
         failUrl: `${window.location.origin}/payment/fail?myOrderId=${orderId}`,
