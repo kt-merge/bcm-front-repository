@@ -110,6 +110,14 @@ export default function HeaderSearch() {
     persistRecent([]);
   };
 
+  const handleRecentSelect = (q: string) => {
+    if (!q) return;
+    router.push(`/?search=${encodeURIComponent(q)}`);
+    addRecent(q);
+    setQuery("");
+    setOpen(false);
+  };
+
   return (
     <div ref={containerRef} className="relative flex-1">
       <form onSubmit={handleSubmit} className="flex items-center">
