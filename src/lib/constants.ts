@@ -26,10 +26,11 @@ export type OrderStatus = (typeof ORDER_STATUS)[number]["value"];
  * 경매 상태
  */
 export const BID_STATUS = [
-  { label: "미입찰", value: "NOT_BIDDED" },
+  { label: "입찰전", value: "NOT_BIDDED" },
   { label: "입찰중", value: "BIDDED" },
-  { label: "낙찰완료", value: "PAYMENT_WAITING" },
-  { label: "종료", value: "COMPLETED" },
+  { label: "미입찰", value: "NO_BIDDER" },
+  { label: "입금대기", value: "PAYMENT_WAITING" },
+  { label: "완료", value: "COMPLETED" },
 ] as const;
 
 export type BidStatus = (typeof BID_STATUS)[number]["value"];

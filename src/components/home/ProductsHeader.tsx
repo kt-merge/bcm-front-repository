@@ -3,7 +3,8 @@ type SortOption =
   | "price-high"
   | "price-low"
   | "bid-count"
-  | "ending-soon";
+  | "ending-soon"
+  | "ended";
 
 interface ProductsHeaderProps {
   searchQuery: string;
@@ -45,6 +46,7 @@ export default function ProductsHeader({
           <option value="price-high">높은 가격순</option>
           <option value="price-low">낮은 가격순</option>
           <option value="bid-count">입찰 많은순</option>
+          <option value="ended">종료된 상품</option>
         </select>
       </div>
     </div>

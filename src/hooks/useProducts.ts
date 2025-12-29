@@ -11,7 +11,8 @@ type SortOption =
   | "price-high"
   | "price-low"
   | "bid-count"
-  | "ending-soon";
+  | "ending-soon"
+  | "ended";
 
 // 정렬 옵션을 서버 정렬 쿼리로 매핑
 // Record 타입 사용으로 모든 SortOption에 대한 매핑을 강제하여 타입 안정성 확보
@@ -21,6 +22,7 @@ const SORT_MAP: Record<SortOption, string> = {
   "price-high": "bidPrice,desc",
   "price-low": "bidPrice,asc",
   "bid-count": "bidCount,desc",
+  ended: "bidEndDate,desc",
 };
 
 export function useProducts(
@@ -76,6 +78,11 @@ export function useProducts(
         params.set("page", String(currentPage));
         params.set("size", String(pageSize));
         params.set("sort", SORT_MAP[sortBy]);
+
+        // 종료된 상품 필터
+        if (sortBy === "ended") {
+          params.set("bidStatus", "COMPLETED");
+        }
 
         const data = await apiGet<ProductListResponse>(
           `/api/products?${params.toString()}`,
