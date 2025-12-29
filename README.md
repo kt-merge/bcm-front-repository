@@ -77,6 +77,7 @@ npm install
 
 # 3. 환경 변수 설정 (.env)
 NEXT_PUBLIC_API_URL=http://localhost:8080
+NEXT_PUBLIC_API_URL=https://bcm.u-jinlee1029.store
 
 # 5. 개발 서버 실행
 npm run dev
