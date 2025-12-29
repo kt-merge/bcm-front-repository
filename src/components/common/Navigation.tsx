@@ -5,9 +5,11 @@ import Image from "next/image";
 import { LogOut, User } from "lucide-react";
 import { useAuth } from "@/hooks/user/useAuth";
 import HeaderSearch from "./HeaderSearch";
+import { usePathname } from "next/navigation";
 
 export default function Navigation() {
   const { user, logout, isLoading } = useAuth();
+  const pathname = usePathname();
 
   const handleLogout = () => {
     if (confirm("정말 로그아웃하시겠습니까?")) {
@@ -47,7 +49,9 @@ export default function Navigation() {
               ) : user ? (
                 // --- 로그인 된 상태 ---
                 <>
-                  <HeaderSearch />
+                  {!(pathname?.startsWith("/login") || pathname?.startsWith("/signup")) && (
+                    <HeaderSearch />
+                  )}
                   <Link
                     href="/mypage"
                     className="text-muted-foreground hover:text-foreground hover:bg-muted shrink-0 rounded-full p-2 transition-colors"
@@ -77,8 +81,10 @@ export default function Navigation() {
                 </>
               ) : (
                 // --- 로그아웃 된 상태 ---
-                <>
-                  <HeaderSearch />
+                  <>
+                  {!(pathname?.startsWith("/login") || pathname?.startsWith("/signup")) && (
+                    <HeaderSearch />
+                  )}
                   <Link
                     href="/login"
                     className="text-muted-foreground hover:text-foreground hover:bg-muted shrink-0 rounded-full p-2 transition-colors"

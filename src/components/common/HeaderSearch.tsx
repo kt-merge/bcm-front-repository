@@ -114,7 +114,7 @@ export default function HeaderSearch() {
     <div ref={containerRef} className="relative flex-1">
       <form onSubmit={handleSubmit} className="flex items-center">
         <div
-          className={`bg-muted/10 flex items-center rounded-full transition-all duration-300 ease-out ${open ? "px-3 py-1 shadow-sm" : "p-1"}`}
+          className={`bg-muted/10 flex items-center rounded-full transition-all duration-300 ease-out ${open ? "px-3 py-1 shadow-sm border-2 border-border" : "p-1 border border-border/30"}`}
           style={{
             WebkitBackdropFilter: "blur(6px)",
             backdropFilter: "blur(6px)",

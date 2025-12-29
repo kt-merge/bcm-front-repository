@@ -1,5 +1,5 @@
 import Navigation from "@/components/common/Navigation";
-import MobileBottomNav from "@/components/common/MobileBottomNav";
+import ClientBottomNav from "@/components/common/ClientBottomNav";
 import "./globals.css";
 import type { Metadata } from "next";
 import { AuthProvider } from "@/hooks/user/useAuth";
@@ -27,7 +27,7 @@ export default function RootLayout({
         <AuthProvider>
           <Navigation />
           <main className="flex-1 overflow-y-auto pb-20">{children}</main>
-          <MobileBottomNav />
+          <ClientBottomNav />
           <footer className="hidden md:block">
             <div>© 2025 Darius Team</div>
           </footer>
