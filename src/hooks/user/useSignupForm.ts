@@ -1,7 +1,8 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiPost } from "@/lib/api";
+import { AUTH_POLICIES } from "@/lib/constants";
 
 export function useSignupForm() {
   const router = useRouter();
@@ -15,8 +16,6 @@ export function useSignupForm() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const NICKNAME_MIN_LENGTH = 2;
-  const NICKNAME_MAX_LENGTH = 10;
 
   const validateField = (
     name: string,
@@ -24,9 +23,6 @@ export function useSignupForm() {
     nextFormData: typeof formData,
   ) => {
     const fieldErrors: Record<string, string> = {};
-    const passwordPolicy =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{10,}$/;
-    const nicknamePolicy = /^[A-Za-z가-힣]+$/;
 
     if (name === "email") {
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
@@ -35,7 +31,7 @@ export function useSignupForm() {
     }
 
     if (name === "password") {
-      if (!passwordPolicy.test(value)) {
+      if (!AUTH_POLICIES.PASSWORD_POLICY.test(value)) {
         fieldErrors.password =
           "비밀번호는 10자 이상이며 대문자, 소문자, 숫자, 특수문자를 모두 포함해야 합니다.";
       }
@@ -55,14 +51,14 @@ export function useSignupForm() {
     if (name === "nickname") {
       if (!value.trim()) {
         fieldErrors.nickname = "닉네임을 입력해주세요.";
-      } else if (!nicknamePolicy.test(value)) {
+      } else if (!AUTH_POLICIES.NICKNAME_POLICY.test(value)) {
         fieldErrors.nickname =
           "닉네임은 공백 없이 한글 또는 영문만 사용할 수 있습니다.";
       } else if (
-        value.length < NICKNAME_MIN_LENGTH ||
-        value.length > NICKNAME_MAX_LENGTH
+        value.length < AUTH_POLICIES.NICKNAME_MIN_LENGTH ||
+        value.length > AUTH_POLICIES.NICKNAME_MAX_LENGTH
       ) {
-        fieldErrors.nickname = `닉네임은 ${NICKNAME_MIN_LENGTH}~${NICKNAME_MAX_LENGTH}자 이내로 입력해주세요.`;
+        fieldErrors.nickname = `닉네임은 ${AUTH_POLICIES.NICKNAME_MIN_LENGTH}~${AUTH_POLICIES.NICKNAME_MAX_LENGTH}자 이내로 입력해주세요.`;
       }
     }
 
@@ -76,15 +72,12 @@ export function useSignupForm() {
     return fieldErrors;
   };
 
-  const validateForm = () => {
+  const validateForm = useCallback(() => {
     const newErrors: Record<string, string> = {};
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = "유효한 이메일을 입력해주세요.";
     }
-    const passwordPolicy =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{10,}$/;
-    const nicknamePolicy = /^[A-Za-z가-힣]+$/;
-    if (!passwordPolicy.test(formData.password)) {
+    if (!AUTH_POLICIES.PASSWORD_POLICY.test(formData.password)) {
       newErrors.password =
         "비밀번호는 10자 이상이며 대문자, 소문자, 숫자, 특수문자를 모두 포함해야 합니다.";
     }
@@ -93,14 +86,14 @@ export function useSignupForm() {
     }
     if (!formData.nickname.trim()) {
       newErrors.nickname = "닉네임을 입력해주세요.";
-    } else if (!nicknamePolicy.test(formData.nickname)) {
+    } else if (!AUTH_POLICIES.NICKNAME_POLICY.test(formData.nickname)) {
       newErrors.nickname =
         "닉네임은 공백 없이 한글 또는 영문만 사용할 수 있습니다.";
     } else if (
-      formData.nickname.length < NICKNAME_MIN_LENGTH ||
-      formData.nickname.length > NICKNAME_MAX_LENGTH
+      formData.nickname.length < AUTH_POLICIES.NICKNAME_MIN_LENGTH ||
+      formData.nickname.length > AUTH_POLICIES.NICKNAME_MAX_LENGTH
     ) {
-      newErrors.nickname = `닉네임은 ${NICKNAME_MIN_LENGTH}~${NICKNAME_MAX_LENGTH}자 이내로 입력해주세요.`;
+      newErrors.nickname = `닉네임은 ${AUTH_POLICIES.NICKNAME_MIN_LENGTH}~${AUTH_POLICIES.NICKNAME_MAX_LENGTH}자 이내로 입력해주세요.`;
     }
     if (!formData.phoneNumber.match(/^\d{10,11}$/)) {
       newErrors.phoneNumber =
@@ -110,7 +103,7 @@ export function useSignupForm() {
       newErrors.terms = "약관에 동의해야 합니다.";
     }
     return newErrors;
-  };
+  }, [formData, termsAccepted]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -118,7 +111,7 @@ export function useSignupForm() {
       name === "phoneNumber"
         ? value.replace(/\D/g, "").slice(0, 11)
         : name === "nickname"
-          ? value.slice(0, NICKNAME_MAX_LENGTH)
+          ? value.slice(0, AUTH_POLICIES.NICKNAME_MAX_LENGTH)
           : value;
     setFormData((prev) => {
       const nextFormData = {
@@ -132,6 +125,7 @@ export function useSignupForm() {
         const fieldErrors = validateField(name, sanitizedValue, nextFormData);
         const affectedKeys = new Set<string>([
           name,
+          ...(name === "password" ? ["confirmPassword"] : []),
           ...Object.keys(fieldErrors),
         ]);
 
@@ -183,7 +177,7 @@ export function useSignupForm() {
 
   const isFormValid = useMemo(
     () => Object.keys(validateForm()).length === 0,
-    [formData, termsAccepted],
+    [validateForm],
   );
 
   return {

@@ -35,6 +35,16 @@ export const BID_STATUS = [
 export type BidStatus = (typeof BID_STATUS)[number]["value"];
 
 /**
+ * 회원가입/인증 정책
+ */
+export const AUTH_POLICIES = {
+  PASSWORD_POLICY: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{10,}$/,
+  NICKNAME_POLICY: /^[A-Za-z가-힣]+$/,
+  NICKNAME_MIN_LENGTH: 2,
+  NICKNAME_MAX_LENGTH: 10,
+} as const;
+
+/**
  * WebSocket 연결 설정
  */
 export const WEBSOCKET_CONFIG = {
