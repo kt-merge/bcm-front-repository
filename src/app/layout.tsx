@@ -1,8 +1,9 @@
 import Navigation from "@/components/common/Navigation";
-import MobileBottomNav from "@/components/common/MobileBottomNav";
+import ClientBottomNav from "@/components/common/ClientBottomNav";
 import "./globals.css";
 import type { Metadata } from "next";
 import { AuthProvider } from "@/hooks/user/useAuth";
+import Script from "next/script";
 
 export const metadata: Metadata = {
   title: "Blind Chicken Market",
@@ -17,15 +18,16 @@ export default function RootLayout({
   return (
     <html lang="ko" className="h-full">
       <head>
-        <script src="https://js.tosspayments.com/v2/standard"></script>
+        <Script
+          src="https://js.tosspayments.com/v2/standard"
+          strategy="afterInteractive"
+        />
       </head>
       <body className="flex h-full flex-col">
         <AuthProvider>
           <Navigation />
-          <main className="flex-1 overflow-y-auto pb-16 md:pb-0">
-            {children}
-          </main>
-          <MobileBottomNav />
+          <main className="flex-1 overflow-y-auto pb-20">{children}</main>
+          <ClientBottomNav />
           <footer className="hidden md:block">
             <div>© 2025 Darius Team</div>
           </footer>
