@@ -22,9 +22,7 @@ export default function RootLayout({
       <body className="flex h-full flex-col">
         <AuthProvider>
           <Navigation />
-          <main className="flex-1 overflow-y-auto pb-16 md:pb-0">
-            {children}
-          </main>
+          <main className="flex-1 overflow-y-auto pb-20">{children}</main>
           <MobileBottomNav />
           <footer className="hidden md:block">
             <div>© 2025 Darius Team</div>

@@ -2,31 +2,16 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Search, PlusCircle, MessageCircle, User } from "lucide-react";
+import { Home, PlusCircle, MessageCircle, User } from "lucide-react";
 import { useAuth } from "@/hooks/user/useAuth";
-import { useState } from "react";
-import SearchModal from "./SearchModal";
 
 export default function MobileBottomNav() {
   const pathname = usePathname();
   const { user } = useAuth();
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-
   const isActive = (path: string) => pathname === path;
-
-  const handleSearchClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsSearchOpen(true);
-  };
 
   const navItems = [
     { href: "/", icon: Home, label: "홈", onClick: undefined },
-    {
-      href: "/search",
-      icon: Search,
-      label: "검색",
-      onClick: handleSearchClick,
-    },
     {
       href: "/products/create",
       icon: PlusCircle,
@@ -44,52 +29,46 @@ export default function MobileBottomNav() {
 
   return (
     <>
-      <nav className="border-border bg-background fixed right-0 bottom-0 left-0 z-50 border-t md:hidden">
-        <div className="flex items-center justify-around">
+      <nav className="bg-background/50 border-border fixed bottom-6 left-1/2 z-50 flex min-w-[260px] -translate-x-1/2 transform items-center rounded-full border px-8 py-3 shadow-md backdrop-blur-sm">
+        <div className="flex items-end gap-5">
           {navItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.href);
 
+            const baseClasses = `flex items-center justify-center p-1 transition-colors duration-200 rounded-full ${
+              active
+                ? "text-red-600"
+                : "text-muted-foreground hover:text-red-400"
+            }`;
+
+            const IconSize = "h-8 w-8";
+
             if (item.onClick) {
               return (
                 <button
-                  key={item.href}
+                  key={`dock-${item.href}`}
                   onClick={item.onClick}
-                  className={`flex flex-1 flex-col items-center gap-1 py-2 transition-colors ${
-                    active
-                      ? "text-primary"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
+                  className={baseClasses}
+                  aria-label={item.label}
                 >
-                  <Icon className="h-6 w-6" />
-                  <span className="text-xs font-medium">{item.label}</span>
+                  <Icon className={IconSize} />
                 </button>
               );
             }
 
             return (
               <Link
-                key={item.href}
+                key={`dock-${item.href}`}
                 href={item.href}
-                className={`flex flex-1 flex-col items-center gap-1 py-2 transition-colors ${
-                  active
-                    ? "text-primary"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
+                className={baseClasses}
+                aria-label={item.label}
               >
-                <Icon className="h-6 w-6" />
-                <span className="text-xs font-medium">{item.label}</span>
+                <Icon className={IconSize} />
               </Link>
             );
           })}
         </div>
       </nav>
-
-      {/* 검색 모달 */}
-      <SearchModal
-        isOpen={isSearchOpen}
-        onClose={() => setIsSearchOpen(false)}
-      />
     </>
   );
 }
