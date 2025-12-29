@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { Search, X } from "lucide-react";
 
 export default function HeaderSearch() {
@@ -9,6 +9,7 @@ export default function HeaderSearch() {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const RECENT_KEY = "recent_searches";
   const [recent, setRecent] = useState<string[]>(() => {
     if (typeof window === "undefined") return [];
@@ -31,6 +32,35 @@ export default function HeaderSearch() {
     document.addEventListener("keydown", handleEscape);
     return () => document.removeEventListener("keydown", handleEscape);
   }, [open]);
+
+  const isOpenRef = useRef(open);
+  useEffect(() => {
+    isOpenRef.current = open;
+  }, [open]);
+
+  // 닫기: 외부 클릭
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (!open) return;
+      if (!containerRef.current) return;
+      if (!containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open]);
+
+  // 닫기: 경로 또는 쿼리 변경 시
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const searchParamsString = searchParams?.toString();
+  useEffect(() => {
+    if (!isOpenRef.current) return;
+    const t = setTimeout(() => setOpen(false), 0);
+    return () => clearTimeout(t);
+  }, [pathname, searchParamsString]);
 
   const toggleOpen = () => {
     setOpen((v) => !v);
@@ -81,30 +111,24 @@ export default function HeaderSearch() {
   };
 
   return (
-    <div className="relative flex-1">
+    <div ref={containerRef} className="relative flex-1">
       <form onSubmit={handleSubmit} className="flex items-center">
         <div
-          className={`bg-muted/10 flex items-center rounded-full transition-all duration-300 ease-out ${
-            open ? "px-3 py-1 shadow-sm" : "p-1"
-          }`}
+          className={`bg-muted/10 flex items-center rounded-full transition-all duration-300 ease-out ${open ? "px-3 py-1 shadow-sm" : "p-1"}`}
           style={{
             WebkitBackdropFilter: "blur(6px)",
             backdropFilter: "blur(6px)",
           }}
         >
           <div
-            className={`flex origin-left transform items-center transition-transform duration-300 ease-out ${
-              open ? "mr-2 w-full scale-x-100 sm:w-56" : "w-0 scale-x-0"
-            }`}
+            className={`flex origin-left transform items-center transition-transform duration-300 ease-out ${open ? "mr-2 w-full scale-x-100 sm:w-56" : "w-0 scale-x-0"}`}
           >
             <input
               ref={inputRef}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="검색어 입력"
-              className={`text-foreground placeholder-muted-foreground w-full bg-transparent py-1 text-sm leading-tight transition-opacity duration-200 focus:outline-none ${
-                open ? "opacity-100" : "pointer-events-none opacity-0"
-              }`}
+              className={`text-foreground placeholder-muted-foreground w-full bg-transparent py-1 text-sm leading-tight transition-opacity duration-200 focus:outline-none ${open ? "opacity-100" : "pointer-events-none opacity-0"}`}
             />
           </div>
 
@@ -154,13 +178,22 @@ export default function HeaderSearch() {
               </div>
               <div className="divide-y">
                 {recent.map((r, i) => (
-                  <button
+                  <div
                     key={r + i}
+                    role="button"
+                    tabIndex={0}
                     onClick={() => {
                       // 즉시 검색
                       router.push(`/?search=${encodeURIComponent(r)}`);
                       addRecent(r);
                       setOpen(false);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        router.push(`/?search=${encodeURIComponent(r)}`);
+                        addRecent(r);
+                        setOpen(false);
+                      }
                     }}
                     className="hover:bg-muted/5 flex w-full items-center justify-between px-3 py-2 text-left"
                   >
@@ -175,7 +208,7 @@ export default function HeaderSearch() {
                     >
                       <X className="h-4 w-4" />
                     </button>
-                  </button>
+                  </div>
                 ))}
               </div>
             </div>
