@@ -9,8 +9,16 @@ export default function HeaderSearch() {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const [recent, setRecent] = useState<string[]>([]);
   const RECENT_KEY = "recent_searches";
+  const [recent, setRecent] = useState<string[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const raw = localStorage.getItem(RECENT_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
+  });
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -23,15 +31,6 @@ export default function HeaderSearch() {
     document.addEventListener("keydown", handleEscape);
     return () => document.removeEventListener("keydown", handleEscape);
   }, [open]);
-
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(RECENT_KEY);
-      if (raw) setRecent(JSON.parse(raw));
-    } catch (e) {
-      setRecent([]);
-    }
-  }, []);
 
   const toggleOpen = () => {
     setOpen((v) => !v);
@@ -54,7 +53,7 @@ export default function HeaderSearch() {
   const persistRecent = (items: string[]) => {
     try {
       localStorage.setItem(RECENT_KEY, JSON.stringify(items));
-    } catch (e) {
+    } catch {
       // ignore
     }
   };

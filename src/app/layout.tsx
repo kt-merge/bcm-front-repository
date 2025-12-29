@@ -3,6 +3,7 @@ import MobileBottomNav from "@/components/common/MobileBottomNav";
 import "./globals.css";
 import type { Metadata } from "next";
 import { AuthProvider } from "@/hooks/user/useAuth";
+import Script from "next/script";
 
 export const metadata: Metadata = {
   title: "Blind Chicken Market",
@@ -17,7 +18,10 @@ export default function RootLayout({
   return (
     <html lang="ko" className="h-full">
       <head>
-        <script src="https://js.tosspayments.com/v2/standard"></script>
+        <Script
+          src="https://js.tosspayments.com/v2/standard"
+          strategy="afterInteractive"
+        />
       </head>
       <body className="flex h-full flex-col">
         <AuthProvider>
