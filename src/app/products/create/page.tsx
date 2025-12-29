@@ -172,6 +172,12 @@ export default function CreateProductPage() {
                     placeholder="0"
                     value={formData.startPrice}
                     onChange={(e) => handleStartPriceChange(e.target.value)}
+                    onFocus={() => handleStartPriceChange("")}
+                    onBlur={(e) => {
+                      if (e.target.value === "") {
+                        handleStartPriceChange("0");
+                      }
+                    }}
                     className="h-9 flex-1 text-sm md:text-base"
                     step="1"
                     min="0"
