@@ -30,6 +30,7 @@ export type Order = {
 
 export interface OrderDetail {
   orderId: number;
+  orderNumber: string;
   productName: string;
   bidPrice: number;
   orderStatus: OrderStatus;
