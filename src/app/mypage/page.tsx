@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/user/useAuth";
+import { useMe } from "@/hooks/user/useMe";
 import { useUserProfile } from "@/hooks/user/useUserProfile";
 import { useProductHistory } from "@/hooks/user/useProductHistory";
 
@@ -14,9 +15,20 @@ import SalesHistorySection from "@/components/mypage/SalesHistorySection";
 export default function MyPage() {
   const router = useRouter();
   const { updateNickname } = useAuth();
+  const { data: meData, isLoading: isMeLoading, refetch } = useMe();
 
   // Custom Hooks
-  const { user, isLoading, handleProfileSave } = useUserProfile();
+  const {
+    user,
+    isLoading,
+    handleProfileSave: saveProfile,
+  } = useUserProfile(meData, isMeLoading);
+
+  // 프로필 저장 후 데이터 새로고침
+  const handleProfileSave = async (nickname: string, phoneNumber: string) => {
+    await saveProfile(nickname, phoneNumber);
+    await refetch(); // 저장 후 최신 데이터 다시 가져오기
+  };
   const {
     purchaseBidding,
     paymentPendingOrders,
@@ -24,7 +36,7 @@ export default function MyPage() {
     sellingBidding,
     sellingPending,
     sellingCompleted,
-  } = useProductHistory();
+  } = useProductHistory(meData, isMeLoading);
 
   // 결제하기 핸들러
   const handlePayment = (orderId: number | string, productName: string) => {

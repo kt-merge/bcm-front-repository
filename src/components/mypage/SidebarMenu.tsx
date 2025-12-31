@@ -24,37 +24,6 @@ export default function SidebarMenu() {
             </a>
           </nav>
         </div>
-
-        {/* 내 정보 섹션 */}
-        <div>
-          <h3 className="text-foreground mb-2 text-sm font-bold">내 정보</h3>
-          <nav className="space-y-1">
-            <a
-              href="#login-info"
-              className="text-foreground hover:bg-muted block rounded-md py-2 text-sm transition-colors"
-            >
-              로그인 정보
-            </a>
-            <a
-              href="#profile"
-              className="text-foreground hover:bg-muted block rounded-md py-2 text-sm transition-colors"
-            >
-              프로필 관리
-            </a>
-            <a
-              href="#address"
-              className="text-foreground hover:bg-muted block rounded-md py-2 text-sm transition-colors"
-            >
-              주소록
-            </a>
-            <a
-              href="#payment-info"
-              className="text-foreground hover:bg-muted block rounded-md py-2 text-sm transition-colors"
-            >
-              결제 정보
-            </a>
-          </nav>
-        </div>
       </div>
     </aside>
   );

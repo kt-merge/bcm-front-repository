@@ -1,96 +1,112 @@
-import { useState, useEffect, useMemo } from "react";
-import type { MypageProductBid, Order, Product, WinnerDetails } from "@/types";
-import { apiGet } from "@/lib/api";
+import { useEffect, useMemo, useReducer } from "react";
+import type { MypageProductBid, Order, Product } from "@/types";
+import type { MeResponse } from "./useMe";
 
-type ApiUserResponse = {
-  products?: Product[];
-  productBids?: MypageProductBid[];
+interface ProductHistoryState {
+  sellingProducts: Product[];
+  purchaseBidding: MypageProductBid[];
   orders: Order[];
-  winners?: WinnerDetails[];
+  isLoading: boolean;
+}
+
+const initialState: ProductHistoryState = {
+  sellingProducts: [],
+  purchaseBidding: [],
+  orders: [],
+  isLoading: true,
 };
 
-export function useProductHistory() {
-  const [sellingProducts, setSellingProducts] = useState<Product[]>([]);
-  const [purchaseBidding, setPurchaseBidding] = useState<MypageProductBid[]>(
-    [],
-  );
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+type ProductHistoryAction = {
+  type: "SET_DATA";
+  payload: ProductHistoryState;
+};
 
-  // 제품 데이터 로드
-  const fetchProductHistory = async () => {
-    try {
-      setError(null);
-      const token = localStorage.getItem("accessToken");
+function reducer(
+  state: ProductHistoryState,
+  action: ProductHistoryAction,
+): ProductHistoryState {
+  switch (action.type) {
+    case "SET_DATA":
+      return action.payload;
+    default:
+      return state;
+  }
+}
 
-      if (!token) {
-        setIsLoading(false);
-        return;
-      }
+export function useProductHistory(
+  meData: MeResponse | null,
+  isMeLoading: boolean,
+) {
+  const [state, dispatch] = useReducer(reducer, initialState);
 
-      const apiUser = await apiGet<ApiUserResponse>("/api/users/me");
-
-      setSellingProducts(apiUser.products ?? []);
-      setPurchaseBidding(apiUser.productBids ?? []);
-      setOrders(apiUser.orders ?? []);
-    } catch (e) {
-      console.error("Failed to fetch product history:", e);
-      setError("상품 내역을 불러오는데 실패했습니다.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // 초기 로드
   useEffect(() => {
-    fetchProductHistory();
-  }, []);
+    if (isMeLoading) {
+      return;
+    }
 
-  // 판매 상품 필터링
+    dispatch({
+      type: "SET_DATA",
+      payload: {
+        sellingProducts: meData?.products ?? [],
+        purchaseBidding: meData?.productBids ?? [],
+        orders: meData?.orders ?? [],
+        isLoading: false,
+      },
+    });
+  }, [isMeLoading, meData]);
+
   const {
     bidding: sellingBidding,
     pending: sellingPending,
     completed: sellingCompleted,
   } = useMemo(() => {
-    const bidding = sellingProducts.filter((p) => p.bidStatus !== "COMPLETED");
-    const pending = sellingProducts.filter((p) => p.bidStatus === "COMPLETED");
-    const completed: Product[] = [];
+    const biddingStatuses = ["NOT_BIDDED", "BIDDED"];
+    const pendingStatuses = ["PAYMENT_WAITING"];
+    const completedStatuses = ["COMPLETED", "NO_BIDDER"];
+
+    const bidding = state.sellingProducts.filter((p) =>
+      biddingStatuses.includes(p.bidStatus),
+    );
+    const pending = state.sellingProducts.filter((p) =>
+      pendingStatuses.includes(p.bidStatus),
+    );
+    const completed = state.sellingProducts.filter((p) =>
+      completedStatuses.includes(p.bidStatus),
+    );
 
     return {
       bidding,
       pending,
       completed,
     };
-  }, [sellingProducts]);
+  }, [state.sellingProducts]);
 
   // 구매 주문 필터링
   const paymentPendingOrders = useMemo(
-    () => orders.filter((order) => order.orderStatus === "PAYMENT_PENDING"),
-    [orders],
+    () =>
+      state.orders.filter((order) => order.orderStatus === "PAYMENT_PENDING"),
+    [state.orders],
   );
 
   const completedOrders = useMemo(
-    () => orders.filter((order) => order.orderStatus === "PAID"),
-    [orders],
+    () => state.orders.filter((order) => order.orderStatus === "PAID"),
+    [state.orders],
   );
 
   return {
     // 판매 관련
-    sellingProducts,
+    sellingProducts: state.sellingProducts,
     sellingBidding,
     sellingPending,
     sellingCompleted,
 
     // 구매 관련
-    purchaseBidding,
-    orders,
+    purchaseBidding: state.purchaseBidding,
+    orders: state.orders,
     paymentPendingOrders,
     completedOrders,
 
     // 상태
-    isLoading,
-    error,
-    refetch: fetchProductHistory,
+    isLoading: state.isLoading,
   };
 }
