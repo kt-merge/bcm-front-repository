@@ -26,6 +26,8 @@ export type Order = {
   productName: string;
   bidPrice: number;
   orderStatus: OrderStatus;
+  thumbnail?: string;
+  imageUrls?: ProductImage[];
 };
 
 export interface OrderDetail {

@@ -52,6 +52,8 @@ export interface MypageProductBid {
   bidderNickname: string;
   bidTime: string;
   bidCount: number;
+  thumbnail?: string;
+  imageUrls?: ProductImage[];
 }
 
 export interface ProductBid {

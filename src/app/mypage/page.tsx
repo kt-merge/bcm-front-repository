@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/user/useAuth";
+import { useMe } from "@/hooks/user/useMe";
 import { useUserProfile } from "@/hooks/user/useUserProfile";
 import { useProductHistory } from "@/hooks/user/useProductHistory";
 
@@ -14,9 +15,13 @@ import SalesHistorySection from "@/components/mypage/SalesHistorySection";
 export default function MyPage() {
   const router = useRouter();
   const { updateNickname } = useAuth();
+  const { data: meData, isLoading: isMeLoading } = useMe();
 
   // Custom Hooks
-  const { user, isLoading, handleProfileSave } = useUserProfile();
+  const { user, isLoading, handleProfileSave } = useUserProfile(
+    meData,
+    isMeLoading,
+  );
   const {
     purchaseBidding,
     paymentPendingOrders,
@@ -24,7 +29,7 @@ export default function MyPage() {
     sellingBidding,
     sellingPending,
     sellingCompleted,
-  } = useProductHistory();
+  } = useProductHistory(meData, isMeLoading);
 
   // 결제하기 핸들러
   const handlePayment = (orderId: number | string, productName: string) => {
