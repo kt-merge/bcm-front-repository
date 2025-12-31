@@ -44,12 +44,20 @@ export function useProductHistory(
       return;
     }
 
+    // orders 데이터를 매핑: product 객체에서 thumbnail과 imageUrls 추출
+    const mappedOrders =
+      meData?.orders?.map((order) => ({
+        ...order,
+        thumbnail: order.product?.thumbnail,
+        imageUrls: order.product?.imageUrls,
+      })) ?? [];
+
     dispatch({
       type: "SET_DATA",
       payload: {
         sellingProducts: meData?.products ?? [],
         purchaseBidding: meData?.productBids ?? [],
-        orders: meData?.orders ?? [],
+        orders: mappedOrders,
         isLoading: false,
       },
     });
@@ -62,7 +70,7 @@ export function useProductHistory(
   } = useMemo(() => {
     const biddingStatuses = ["NOT_BIDDED", "BIDDED"];
     const pendingStatuses = ["PAYMENT_WAITING"];
-    const completedStatuses = ["COMPLETED", "NO_BIDDER"];
+    const completedStatuses = ["COMPLETED", "PAYMENT_WAITING", "NO_BIDDER"];
 
     const bidding = state.sellingProducts.filter((p) =>
       biddingStatuses.includes(p.bidStatus),

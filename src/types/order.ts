@@ -28,6 +28,12 @@ export type Order = {
   orderStatus: OrderStatus;
   thumbnail?: string;
   imageUrls?: ProductImage[];
+  product?: {
+    id: number;
+    name: string;
+    thumbnail?: string;
+    imageUrls?: ProductImage[];
+  };
 };
 
 export interface OrderDetail {

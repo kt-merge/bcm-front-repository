@@ -29,7 +29,7 @@ export const BID_STATUS = [
   { label: "미입찰", value: "NOT_BIDDED" },
   { label: "입찰중", value: "BIDDED" },
   { label: "유찰", value: "NO_BIDDER" },
-  { label: "입금대기", value: "PAYMENT_WAITING" },
+  { label: "결제대기", value: "PAYMENT_WAITING" },
   { label: "완료", value: "COMPLETED" },
 ] as const;
 
