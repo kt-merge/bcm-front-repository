@@ -15,13 +15,20 @@ import SalesHistorySection from "@/components/mypage/SalesHistorySection";
 export default function MyPage() {
   const router = useRouter();
   const { updateNickname } = useAuth();
-  const { data: meData, isLoading: isMeLoading } = useMe();
+  const { data: meData, isLoading: isMeLoading, refetch } = useMe();
 
   // Custom Hooks
-  const { user, isLoading, handleProfileSave } = useUserProfile(
-    meData,
-    isMeLoading,
-  );
+  const {
+    user,
+    isLoading,
+    handleProfileSave: saveProfile,
+  } = useUserProfile(meData, isMeLoading);
+
+  // 프로필 저장 후 데이터 새로고침
+  const handleProfileSave = async (nickname: string, phoneNumber: string) => {
+    await saveProfile(nickname, phoneNumber);
+    await refetch(); // 저장 후 최신 데이터 다시 가져오기
+  };
   const {
     purchaseBidding,
     paymentPendingOrders,

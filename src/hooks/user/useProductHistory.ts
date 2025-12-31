@@ -1,4 +1,4 @@
-import { useLayoutEffect, useMemo, useReducer } from "react";
+import { useEffect, useMemo, useReducer } from "react";
 import type { MypageProductBid, Order, Product } from "@/types";
 import type { MeResponse } from "./useMe";
 
@@ -39,7 +39,7 @@ export function useProductHistory(
 ) {
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (isMeLoading) {
       return;
     }
