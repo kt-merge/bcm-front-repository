@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, PlusCircle, MessageCircle, User } from "lucide-react";
+import { Home, PlusCircle, User } from "lucide-react";
 import { useAuth } from "@/hooks/user/useAuth";
 
 export default function MobileBottomNav() {
@@ -18,7 +18,6 @@ export default function MobileBottomNav() {
       label: "등록",
       onClick: undefined,
     },
-    { href: "/chat", icon: MessageCircle, label: "채팅", onClick: undefined },
     {
       href: user ? "/mypage" : "/login",
       icon: User,
@@ -29,8 +28,8 @@ export default function MobileBottomNav() {
 
   return (
     <>
-      <nav className="bg-background/50 border-border fixed bottom-6 left-1/2 z-50 flex min-w-[260px] -translate-x-1/2 transform items-center rounded-full border px-8 py-3 shadow-md backdrop-blur-sm">
-        <div className="flex items-end gap-5">
+      <nav className="bg-background/50 border-border fixed bottom-6 left-1/2 z-50 flex min-w-[220px] -translate-x-1/2 transform items-center rounded-full border px-7 py-3 shadow-md backdrop-blur-sm">
+        <div className="flex w-full items-end justify-between gap-4">
           {navItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.href);

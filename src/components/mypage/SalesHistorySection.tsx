@@ -153,9 +153,7 @@ export default function SalesHistorySection({
                     price={product.bidPrice ?? product.startPrice}
                     image={product.thumbnail}
                     subText={
-                      product.bidStatus === "NO_BIDDER"
-                        ? "유찰된 상품입니다."
-                        : "결제완료"
+                      product.bidStatus === "NO_BIDDER" ? "유찰" : "결제완료"
                     }
                   />
                 ))
