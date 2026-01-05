@@ -52,7 +52,7 @@ export default function PurchaseHistorySection({
             <p
               className={getStatClass(paymentPendingOrders.length, true, true)}
             >
-              결제 대기
+              결제대기
             </p>
             <p
               className={getStatClass(paymentPendingOrders.length, true, false)}
@@ -108,11 +108,11 @@ export default function PurchaseHistorySection({
             <h3
               className={`mb-3 text-sm font-medium ${
                 paymentPendingOrders.length > 0
-                  ? "text-primary"
+                  ? "text-primary font-bold"
                   : "text-muted-foreground"
               }`}
             >
-              결제 대기
+              결제대기
             </h3>
             <div
               className={`rounded-lg border ${
@@ -131,11 +131,11 @@ export default function PurchaseHistorySection({
                 paymentPendingOrders.map((order) => (
                   <ProductListItem
                     key={order.orderId}
-                    id={order.orderId}
+                    id={order.product?.id || order.orderId}
                     name={order.productName}
                     price={order.bidPrice}
                     image={order.thumbnail || order.imageUrls?.[0]?.imageUrl}
-                    subText="낙찰 성공! 결제가 필요합니다."
+                    subText="낙찰 성공! 결제 대기 중"
                     actionNode={
                       <Button
                         size="sm"
@@ -172,8 +172,13 @@ export default function PurchaseHistorySection({
                     name={order.productName}
                     price={order.bidPrice}
                     image={order.thumbnail || order.imageUrls?.[0]?.imageUrl}
-                    status={order.orderStatus}
-                    badgeText="구매 완료"
+                    subText={
+                      order.orderStatus === "PAID"
+                        ? "결제 완료"
+                        : order.orderStatus === "EXPIRED"
+                          ? "기간 만료"
+                          : "종료"
+                    }
                   />
                 ))
               )}

@@ -30,7 +30,7 @@ export const BID_STATUS = [
   { label: "입찰중", value: "BIDDED" },
   { label: "유찰", value: "NO_BIDDER" },
   { label: "결제대기", value: "PAYMENT_WAITING" },
-  { label: "완료", value: "COMPLETED" },
+  { label: "종료", value: "COMPLETED" },
 ] as const;
 
 export type BidStatus = (typeof BID_STATUS)[number]["value"];
