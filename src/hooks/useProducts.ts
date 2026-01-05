@@ -25,6 +25,14 @@ const SORT_MAP: Record<SortOption, string> = {
   ended: "bidEndDate,desc",
 };
 
+const ENDED_STATUSES: Product["bidStatus"][] = [
+  "COMPLETED",
+  "NO_BIDDER",
+  "PAYMENT_WAITING",
+];
+
+const ACTIVE_STATUSES: Product["bidStatus"][] = ["NOT_BIDDED", "BIDDED"];
+
 export function useProducts(
   searchQuery: string = "",
   pageSize: number = 6,
@@ -61,11 +69,17 @@ export function useProducts(
     // Mock 데이터 폴백 로직
     const applyMockDataFallback = (pageNum: number) => {
       const all = (mockData as Product[]) ?? [];
+      const filteredAll = all.filter((product) =>
+        sortBy === "ended"
+          ? ENDED_STATUSES.includes(product.bidStatus)
+          : ACTIVE_STATUSES.includes(product.bidStatus),
+      );
       const startIdx = pageNum * pageSize;
       const endIdx = startIdx + pageSize;
-      setProducts(all.slice(startIdx, endIdx));
-      setTotalPages(Math.ceil(all.length / pageSize));
-      setTotalItems(all.length);
+      const pageSlice = filteredAll.slice(startIdx, endIdx);
+      setProducts(pageSlice);
+      setTotalPages(Math.ceil(filteredAll.length / pageSize));
+      setTotalItems(filteredAll.length);
     };
 
     const fetchPage = async () => {
@@ -81,7 +95,9 @@ export function useProducts(
 
         // 종료된 상품 필터
         if (sortBy === "ended") {
-          params.set("bidStatus", "COMPLETED");
+          params.set("bidStatus", ENDED_STATUSES.join(","));
+        } else {
+          params.set("bidStatus", ACTIVE_STATUSES.join(","));
         }
 
         const data = await apiGet<ProductListResponse>(
@@ -92,6 +108,11 @@ export function useProducts(
 
         const total = data.totalElements ?? 0;
         const list = data.content ?? [];
+        const filteredList = list.filter((product) =>
+          sortBy === "ended"
+            ? ENDED_STATUSES.includes(product.bidStatus)
+            : ACTIVE_STATUSES.includes(product.bidStatus),
+        );
 
         // 서버가 정상 응답했지만 결과가 비어있을 때, (검색어가 없고) 설정에 따라 목데이터 사용
         if (!searchQuery.trim() && total === 0 && USE_MOCK_WHEN_EMPTY) {
@@ -99,9 +120,9 @@ export function useProducts(
           return;
         }
 
-        setProducts(list);
+        setProducts(filteredList);
         setTotalPages(data.totalPages ?? 0);
-        setTotalItems(total);
+        setTotalItems(filteredList.length);
       } catch (error) {
         console.error("제품 목록 조회 실패, 목데이터 사용:", error);
         applyMockDataFallback(currentPage);

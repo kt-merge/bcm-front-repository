@@ -23,6 +23,14 @@ const SORT_MAP: Record<SortOption, string> = {
   ended: "bidEndDate,desc",
 };
 
+const ENDED_STATUSES: Product["bidStatus"][] = [
+  "COMPLETED",
+  "NO_BIDDER",
+  "PAYMENT_WAITING",
+];
+
+const ACTIVE_STATUSES: Product["bidStatus"][] = ["NOT_BIDDED", "BIDDED"];
+
 export function useInfiniteProducts(
   searchQuery: string = "",
   pageSize: number = 6,
@@ -40,6 +48,7 @@ export function useInfiniteProducts(
     setProducts([]);
     setCurrentPage(0);
     setHasMore(true);
+    setTotalItems(0);
   }, [searchQuery, sortBy]);
 
   // 데이터 로드
@@ -49,16 +58,25 @@ export function useInfiniteProducts(
     // Mock 데이터 폴백 로직
     const applyMockDataFallback = (currentPageNum: number) => {
       const all = (mockData as Product[]) ?? [];
+      const filteredAll = all.filter((product) =>
+        sortBy === "ended"
+          ? ENDED_STATUSES.includes(product.bidStatus)
+          : ACTIVE_STATUSES.includes(product.bidStatus),
+      );
       const startIdx = currentPageNum * pageSize;
       const endIdx = startIdx + pageSize;
-      const fallbackProducts = all.slice(startIdx, endIdx);
+      const fallbackProducts = filteredAll.slice(startIdx, endIdx);
       setProducts((prev) =>
         currentPageNum === 0
           ? fallbackProducts
           : [...prev, ...fallbackProducts],
       );
-      setTotalItems(all.length);
-      setHasMore(endIdx < all.length);
+      setTotalItems((prev) =>
+        currentPageNum === 0
+          ? fallbackProducts.length
+          : prev + fallbackProducts.length,
+      );
+      setHasMore(endIdx < filteredAll.length);
     };
 
     const loadMore = async () => {
@@ -72,7 +90,9 @@ export function useInfiniteProducts(
         params.set("size", String(pageSize));
         params.set("sort", SORT_MAP[sortBy]);
         if (sortBy === "ended") {
-          params.set("bidStatus", "COMPLETED");
+          params.set("bidStatus", ENDED_STATUSES.join(","));
+        } else {
+          params.set("bidStatus", ACTIVE_STATUSES.join(","));
         }
 
         const data = await apiGet<ProductListResponse>(
@@ -83,6 +103,11 @@ export function useInfiniteProducts(
 
         const total = data.totalElements ?? 0;
         const newProducts = data.content ?? [];
+        const filteredProducts = newProducts.filter((product) =>
+          sortBy === "ended"
+            ? ENDED_STATUSES.includes(product.bidStatus)
+            : ACTIVE_STATUSES.includes(product.bidStatus),
+        );
 
         // 서버가 정상 응답했지만 결과가 비어있을 때, (검색어가 없고) 설정에 따라 목데이터 사용
         if (!searchQuery.trim() && total === 0 && USE_MOCK_WHEN_EMPTY) {
@@ -90,8 +115,8 @@ export function useInfiniteProducts(
           return;
         }
 
-        setProducts((prev) => [...prev, ...newProducts]);
-        setTotalItems(total);
+        setProducts((prev) => [...prev, ...filteredProducts]);
+        setTotalItems((prev) => prev + filteredProducts.length);
         setHasMore(currentPage + 1 < (data.totalPages ?? 0));
       } catch (error) {
         if (ignore) return;
