@@ -108,11 +108,6 @@ export function useProducts(
 
         const total = data.totalElements ?? 0;
         const list = data.content ?? [];
-        const filteredList = list.filter((product) =>
-          sortBy === "ended"
-            ? ENDED_STATUSES.includes(product.bidStatus)
-            : ACTIVE_STATUSES.includes(product.bidStatus),
-        );
 
         // 서버가 정상 응답했지만 결과가 비어있을 때, (검색어가 없고) 설정에 따라 목데이터 사용
         if (!searchQuery.trim() && total === 0 && USE_MOCK_WHEN_EMPTY) {
@@ -120,9 +115,9 @@ export function useProducts(
           return;
         }
 
-        setProducts(filteredList);
+        setProducts(list);
         setTotalPages(data.totalPages ?? 0);
-        setTotalItems(filteredList.length);
+        setTotalItems(total);
       } catch (error) {
         console.error("제품 목록 조회 실패, 목데이터 사용:", error);
         applyMockDataFallback(currentPage);

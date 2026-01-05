@@ -71,11 +71,7 @@ export function useInfiniteProducts(
           ? fallbackProducts
           : [...prev, ...fallbackProducts],
       );
-      setTotalItems((prev) =>
-        currentPageNum === 0
-          ? fallbackProducts.length
-          : prev + fallbackProducts.length,
-      );
+      setTotalItems(filteredAll.length);
       setHasMore(endIdx < filteredAll.length);
     };
 
@@ -103,11 +99,6 @@ export function useInfiniteProducts(
 
         const total = data.totalElements ?? 0;
         const newProducts = data.content ?? [];
-        const filteredProducts = newProducts.filter((product) =>
-          sortBy === "ended"
-            ? ENDED_STATUSES.includes(product.bidStatus)
-            : ACTIVE_STATUSES.includes(product.bidStatus),
-        );
 
         // 서버가 정상 응답했지만 결과가 비어있을 때, (검색어가 없고) 설정에 따라 목데이터 사용
         if (!searchQuery.trim() && total === 0 && USE_MOCK_WHEN_EMPTY) {
@@ -115,8 +106,8 @@ export function useInfiniteProducts(
           return;
         }
 
-        setProducts((prev) => [...prev, ...filteredProducts]);
-        setTotalItems((prev) => prev + filteredProducts.length);
+        setProducts((prev) => [...prev, ...newProducts]);
+        setTotalItems(total);
         setHasMore(currentPage + 1 < (data.totalPages ?? 0));
       } catch (error) {
         if (ignore) return;
