@@ -70,7 +70,7 @@ export function useProductHistory(
   } = useMemo(() => {
     const biddingStatuses = ["NOT_BIDDED", "BIDDED"];
     const pendingStatuses = ["PAYMENT_WAITING"];
-    const completedStatuses = ["COMPLETED", "PAYMENT_WAITING", "NO_BIDDER"];
+    const completedStatuses = ["COMPLETED", "NO_BIDDER"];
 
     const bidding = state.sellingProducts.filter((p) =>
       biddingStatuses.includes(p.bidStatus),

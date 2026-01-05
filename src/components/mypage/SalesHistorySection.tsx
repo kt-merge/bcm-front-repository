@@ -86,7 +86,6 @@ export default function SalesHistorySection({
                     name={product.name}
                     price={product.bidPrice ?? product.startPrice}
                     image={product.thumbnail}
-                    status={product.productStatus}
                     subText={`전체 입찰 횟수: ${product.bidCount}`}
                   />
                 ))
@@ -126,7 +125,6 @@ export default function SalesHistorySection({
                     name={product.name}
                     price={product.bidPrice ?? product.startPrice}
                     image={product.thumbnail}
-                    status={product.productStatus}
                     subText="구매자 결제 대기 중"
                   />
                 ))
@@ -154,9 +152,11 @@ export default function SalesHistorySection({
                     name={product.name}
                     price={product.bidPrice ?? product.startPrice}
                     image={product.thumbnail}
-                    status={product.productStatus}
-                    badgeText="종료"
-                    subText="종료됨"
+                    subText={
+                      product.bidStatus === "NO_BIDDER"
+                        ? "유찰된 상품입니다."
+                        : "결제완료"
+                    }
                   />
                 ))
               )}
