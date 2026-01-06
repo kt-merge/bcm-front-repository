@@ -143,13 +143,13 @@ export function getStatClass(
  * @returns 최소 입찰 단위 (예: 100만원 → 10만원, 1000만원 → 100만원)
  */
 export function getMinBidIncrement(currentPrice: number): number {
-  if (currentPrice === 0) return 1000;
+  if (currentPrice === 0) return 10;
 
   // 현재 가격의 자릿수를 구함 (10의 제곱)
   const magnitude = Math.pow(10, Math.floor(Math.log10(currentPrice)));
 
   // 한 자릿수 아래 단위로 입찰 (예: 100만원 → 10만원, 1000만원 → 100만원)
-  return Math.max(magnitude / 10, 1000);
+  return Math.max(magnitude / 10, 10);
 }
 
 /**
