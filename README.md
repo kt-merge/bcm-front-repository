@@ -218,7 +218,7 @@ npm run dev
 - Shadcn/ui
   https://ui.shadcn.com/docs/installation/next
 
-## 📷 사진
+## 📷 화면 캡처
 <img width="632" height="787" alt="1" src="https://github.com/user-attachments/assets/02899703-cfc4-4fcd-9cdc-54ee134cc04e" />
 <img width="619" height="565" alt="6" src="https://github.com/user-attachments/assets/f1ef9ff6-bc2f-4b55-b9e9-10726078c859" />
 <img width="613" height="484" alt="2" src="https://github.com/user-attachments/assets/5d7cb577-45cd-459c-bea6-7383ae03d736" />
