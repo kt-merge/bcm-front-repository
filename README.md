@@ -215,6 +215,15 @@ npm run dev
 
 - Tailwind CSS 설치 및 클래스
   https://tailwindcss.com/docs/installation/using-vite
-
 - Shadcn/ui
   https://ui.shadcn.com/docs/installation/next
+
+## 📷 사진
+<img width="632" height="787" alt="1" src="https://github.com/user-attachments/assets/02899703-cfc4-4fcd-9cdc-54ee134cc04e" />
+<img width="619" height="565" alt="6" src="https://github.com/user-attachments/assets/f1ef9ff6-bc2f-4b55-b9e9-10726078c859" />
+<img width="613" height="484" alt="2" src="https://github.com/user-attachments/assets/5d7cb577-45cd-459c-bea6-7383ae03d736" />
+<img width="615" height="868" alt="3" src="https://github.com/user-attachments/assets/4147db85-0f58-459a-890f-a7df8dd0246c" />
+<img width="621" height="646" alt="4" src="https://github.com/user-attachments/assets/e7f45d1c-677d-4ba0-8eea-b6c0eff7378e" />
+<img width="621" height="432" alt="5" src="https://github.com/user-attachments/assets/fa38e807-d452-43b4-9a76-d4cad04ce75a" />
+
+  
