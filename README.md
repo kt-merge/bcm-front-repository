@@ -214,7 +214,7 @@ npm run dev
 - **종료된 상품에서 웹소켓 메시지 수신 지속**
   - 상황: 경매 종료/낙찰 이후에도 STOMP 구독이 남아 실시간 입찰 알림이 계속 수신.
   - 원인: 상태 전환 시 구독 해제와 소켓 disconnect 처리가 누락.
-  - 해결: 경매 상태가 CLOSED·SOLD_OUT 등으로 바뀌면 즉시 unsubscribe + disconnect, 컴포넌트 언마운트 시에도 정리하여 중복 메시지 방지.
+  - 해결: 경매 상태가 바뀌면 즉시 unsubscribe + disconnect, 컴포넌트 언마운트 시에도 정리하여 중복 메시지 방지.
 
 ---
 
