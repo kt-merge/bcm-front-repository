@@ -9,13 +9,13 @@
 
 ## 🚀 프로젝트 개요
 
-| 항목       | 내용                        |
-| ---------- | --------------------------- |
-| 프로젝트명 | Blind Chicken Market        |
-| 파트       | Frontend (User Web)         |
-| 목적       | 중고 거래 · 경매 UI/UX 구현 |
-| 개발 기간  | 2025.10.31 ~ 2026.01.02     |
-| 배포 주소  | [(링크)](https://bcm.u-jinlee1029.store/)                 | 
+| 항목       | 내용                                      |
+| ---------- | ----------------------------------------- |
+| 프로젝트명 | Blind Chicken Market                      |
+| 파트       | Frontend (User Web)                       |
+| 목적       | 중고 거래 · 경매 UI/UX 구현               |
+| 개발 기간  | 2025.10.31 ~ 2026.01.02                   |
+| 배포 주소  | [(링크)](https://bcm.u-jinlee1029.store/) |
 
 ---
 
@@ -202,6 +202,22 @@ npm run dev
 
 ---
 
+## 🛡️ 트러블슈팅
+
+- **URL 직접 입력을 통한 비인가 접근(IDOR) 방지**
+  - 상황: 결제 페이지가 /payment/101처럼 주문 ID를 포함하여 브라우저 주소창에 직접 입력 가능.
+  - 원인: 버튼 숨김만으로는 주소창 강제 진입을 막을 수 없으며, 권한 검증이 없으면 타인 결제 정보 노출·대납 위험.
+  - 해결: API 권한 검증 + 프론트엔드 강제 리다이렉트 이중 방어
+    - 페이지 진입 시 주문 정보 조회 API 호출
+    - 백엔드: 본인 주문이 아니면 403 Forbidden 반환
+    - 프론트엔드: 403 감지 시 경고 표시 후 메인으로 이동
+- **종료된 상품에서 웹소켓 메시지 수신 지속**
+  - 상황: 경매 종료/낙찰 이후에도 STOMP 구독이 남아 실시간 입찰 알림이 계속 수신.
+  - 원인: 상태 전환 시 구독 해제와 소켓 disconnect 처리가 누락.
+  - 해결: 경매 상태가 CLOSED·SOLD_OUT 등으로 바뀌면 즉시 unsubscribe + disconnect, 컴포넌트 언마운트 시에도 정리하여 중복 메시지 방지.
+
+---
+
 ## 🧹 Code Style
 
 - Formatter: Prettier
@@ -221,6 +237,7 @@ npm run dev
 ---
 
 ## 📷 화면 캡처
+
 <img width="632" height="787" alt="1" src="https://github.com/user-attachments/assets/02899703-cfc4-4fcd-9cdc-54ee134cc04e" />
 <img width="619" height="565" alt="6" src="https://github.com/user-attachments/assets/f1ef9ff6-bc2f-4b55-b9e9-10726078c859" />
 <img width="613" height="484" alt="2" src="https://github.com/user-attachments/assets/5d7cb577-45cd-459c-bea6-7383ae03d736" />
@@ -229,5 +246,5 @@ npm run dev
 <img width="621" height="432" alt="5" src="https://github.com/user-attachments/assets/fa38e807-d452-43b4-9a76-d4cad04ce75a" />
 
 ## 📷 시연 영상
+
 https://www.youtube.com/watch?v=dM07anPjfsk
-  
