@@ -228,4 +228,6 @@ npm run dev
 <img width="621" height="646" alt="4" src="https://github.com/user-attachments/assets/e7f45d1c-677d-4ba0-8eea-b6c0eff7378e" />
 <img width="621" height="432" alt="5" src="https://github.com/user-attachments/assets/fa38e807-d452-43b4-9a76-d4cad04ce75a" />
 
+## 📷 시연 영상
+https://www.youtube.com/watch?v=dM07anPjfsk
   
