@@ -35,6 +35,7 @@
 ### Infra / 기타
 - Docker
 - Git, GitHub
+- AWS
 
 ---
 
