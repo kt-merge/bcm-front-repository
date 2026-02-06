@@ -16,11 +16,13 @@
 ---
 
 ## 🛠️ 기술 스택
+이 프로젝트는 빠른 개발 생산성, 타입 안정성, 반응형 UI, 그리고 실시간 상호작용을 핵심 목표로 하여 아래 스택을 선택했습니다.
 
 ### Frontend
 - Next.js (App Router), TypeScript
 - Tailwind CSS, shadcn/ui
 - WebSocket (STOMP)
+- Data Fetching: Fetch API
 
 ### Backend (협업/이해 수준)
 - Spring Boot 기반 API 연동
@@ -32,7 +34,7 @@
 
 ---
 
-## 🎬 데모 / 스크린샷
+## 🎬 스크린샷
 
 ### 메인 화면
 <img width="632" height="787" alt="1" src="https://github.com/user-attachments/assets/02899703-cfc4-4fcd-9cdc-54ee134cc04e" />
@@ -52,14 +54,14 @@
 ### 결제 완료
 <img width="621" height="432" alt="5" src="https://github.com/user-attachments/assets/fa38e807-d452-43b4-9a76-d4cad04ce75a" />
 
-> [(배포주소)](https://bcm.u-jinlee1029.store/)
+> [(배포주소)](https://bcm.u-jinlee1029.store/) <br />
 > [(시연영상)](https://www.youtube.com/watch?v=dM07anPjfsk)
 
 ---
 
 ## ✨ 주요 기능
 
-- 회원가입 / 로그인 / 로그아웃
+- 회원가입 / 로그인 / 로그아웃 (커스텀 인증 API)
 - 상품 CRUD
 - 실시간 경매 참여 (WebSocket)
 - 결제 시스템 연동
@@ -134,6 +136,7 @@ URL 직접 입력을 통한 비인가 접근을 차단하고, 비정상 접근 �
 - 권장(설계): Access Token은 메모리(전역 상태)로 보관하고, Refresh Token은 httpOnly + Secure + SameSite 쿠키로 분리하여 보안 강화
 
 **참고**: 시간 관계상 레포지토리 내 실제 코드 변경(예: localStorage → 메모리 전환, Auth 초기화에서의 reissue 호출 등)은 이번 작업에 포함되지 않았습니다.
+현재 레포지토리의 실제 구현은 Access Token을 `localStorage`에 저장하도록 되어 있으므로(예: `src/hooks/user` 및 `src/lib/api.ts`), 권장 설계를 적용하려면 추가 리팩터링이 필요합니다.
 
 ---
 
@@ -264,7 +267,7 @@ bcm-front-repository/
 │   │       └── useUserProfile.ts     # 사용자 프로필
 │   │
 │   ├── lib/                          # 유틸리티, API, 설정
-│   │   ├── api.ts                    # Axios API 클라이언트
+│   │   ├── api.ts                    # Fetch 기반 API 래퍼 (토큰 자동 포함 및 재발급 처리)
 │   │   ├── constants.ts              # 상수 정의
 │   │   ├── errors.ts                 # 에러 처리
 │   │   └── utils.ts                  # 유틸리티 함수
