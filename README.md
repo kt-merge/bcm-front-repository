@@ -34,7 +34,9 @@
 
 ---
 
-## 🎬 스크린샷
+## 🎬 화면
+> [(배포주소)](https://bcm.u-jinlee1029.store/) <br />
+> [(시연영상)](https://www.youtube.com/watch?v=dM07anPjfsk)
 
 ### 메인 화면
 <img width="632" height="787" alt="1" src="https://github.com/user-attachments/assets/02899703-cfc4-4fcd-9cdc-54ee134cc04e" />
@@ -54,8 +56,6 @@
 ### 결제 완료
 <img width="621" height="432" alt="5" src="https://github.com/user-attachments/assets/fa38e807-d452-43b4-9a76-d4cad04ce75a" />
 
-> [(배포주소)](https://bcm.u-jinlee1029.store/) <br />
-> [(시연영상)](https://www.youtube.com/watch?v=dM07anPjfsk)
 
 ---
 
